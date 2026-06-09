@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Summary of Account</title>
-    <link rel="icon" type="image/png" href="{{ asset('storage/logofavicon/favicon.ico') }}">
-
     <style>
         @page { margin: 12mm 10mm 15mm 10mm; }
         body {
@@ -50,6 +48,7 @@
 
         .paid-row td    { color: #166534; }
         .unpaid-row td  { color: #991b1b; font-weight: 500; }
+        .exempted-row td { color: #854d0e; font-style: italic; }
 
         .section-header {
             background: #f0f4ff;
@@ -69,10 +68,16 @@
             color: #991b1b;
             font-weight: bold;
         }
+        .subtotal-exempted {
+            background: #fefce8 !important;
+            color: #854d0e;
+            font-weight: bold;
+        }
         .grand-subtotal {
             background: #f8fafc;
             font-weight: bold;
             border-top: 2px solid #1e40af;
+            font-size: 13px;
         }
     </style>
 </head>
@@ -145,23 +150,23 @@
                             </tr>
                         </thead>
                         <tbody>
+
                             <!-- Paid Items -->
                             @foreach ($data['paid'] as $item)
                                 <tr class="paid-row">
                                     <td>{{ $item['payable_name'] }}</td>
-                                    <td style="text-align:center">{{ $item['OR'] ?? '-'}}</td>
+                                    <td style="text-align:center">{{ $item['OR'] }}</td>
                                     <td style="text-align:right">{{ number_format($item['amount'], 2) }}</td>
                                     <td style="text-align:right">{{ number_format($item['penalty_amount'], 2) }}</td>
                                     <td style="text-align:right">{{ number_format($item['paid_amount'], 2) }}</td>
-                                    <td style="text-align:right">{{ number_format($item['total_amount'], 2) }}</td>
+                                    <td style="text-align:center">{{ number_format($item['total_amount'], 2) }}</td>
                                 </tr>
                             @endforeach
 
                             @if (count($data['paid']) > 0)
                             <tr class="subtotal-paid">
-                                <td colspan="4" style="text-align:right">TOTAL PAID</td>
+                                <td colspan="5" style="text-align:right">TOTAL</td>
                                 <td style="text-align:right">Php {{ number_format($data['paidTotal'], 2) }}</td>
-                                <td></td>
                             </tr>
                             @endif
 
@@ -169,28 +174,48 @@
                             @foreach ($data['unpaid'] as $item)
                                 <tr class="unpaid-row">
                                     <td>{{ $item['payable_name'] }}</td>
-                                    <td style="text-align:center">{{ $item['OR'] ?? '-'}}</td>
+                                    <td style="text-align:center">{{ $item['OR'] }}</td>
                                     <td style="text-align:right">{{ number_format($item['amount'], 2) }}</td>
                                     <td style="text-align:right">{{ number_format($item['penalty_amount'], 2) }}</td>
                                     <td style="text-align:right">{{ number_format($item['paid_amount'], 2) }}</td>
-                                    <td style="text-align:right">{{ number_format($item['total_amount'], 2) }}</td>
+                                    <td style="text-align:center">{{ number_format($item['total_amount'], 2) }}</td>
                                 </tr>
                             @endforeach
 
                             @if (count($data['unpaid']) > 0)
                             <tr class="subtotal-unpaid">
-                                <td colspan="4" style="text-align:right">TOTAL UNPAID</td>
+                                <td colspan="5" style="text-align:right">TOTAL</td>
                                 <td style="text-align:right">Php {{ number_format($data['unpaidTotal'], 2) }}</td>
-                                <td></td>
                             </tr>
                             @endif
 
-                            <!-- Combined Subtotal for this School Year -->
-                            @if (count($data['paid']) > 0 || count($data['unpaid']) > 0)
+                            <!-- Exempted Items -->
+                            @foreach ($data['exempted'] as $item)
+                                <tr class="exempted-row">
+                                    <td>{{ $item['payable_name'] }}</td>
+                                    <td style="text-align:center">{{ $item['OR'] }}</td>
+                                    <td style="text-align:right">{{ number_format($item['amount'], 2) }}</td>
+                                    <td style="text-align:right">{{ number_format($item['penalty_amount'], 2) }}</td>
+                                    <td style="text-align:right">{{ number_format($item['paid_amount'], 2) }}</td>
+                                    <td style="text-align:center">{{ $item['remarks'] }}</td>
+                                </tr>
+                            @endforeach
+
+                            @if (count($data['exempted']) > 0)
+                            <tr class="subtotal-exempted">
+                                <td colspan="5" style="text-align:right">TOTAL</td>
+                                <td style="text-align:right">Php {{ number_format($data['exemptedTotal'], 2) }}</td>
+                            </tr>
+                            @endif
+
+                            <!-- GRAND TOTAL -->
+                            @php
+                                $grandTotal = $data['paidTotal'] + $data['unpaidTotal'] + $data['exemptedTotal'];
+                            @endphp
+                            @if ($grandTotal > 0)
                             <tr class="grand-subtotal">
-                                <td colspan="4" style="text-align:right">TOTAL</td>
-                                <td style="text-align:right">Php {{ number_format($data['paidTotal'] + $data['unpaidTotal'], 2) }}</td>
-                                <td></td>
+                                <td colspan="5" style="text-align:right">GRAND TOTAL</td>
+                                <td style="text-align:right">Php {{ number_format($grandTotal, 2) }}</td>
                             </tr>
                             @endif
 

@@ -220,6 +220,7 @@ class StudentController extends Controller
 
         try {
             $student = Student::findOrFail($request->student_id);
+
             $selectedPayables = $request->selected_payables;
             $orNumber = $request->or_number;
 
@@ -228,9 +229,11 @@ class StudentController extends Controller
             $payablesData = [];
 
             foreach ($selectedPayables as $item) {
+
                 $chargeAmount = (float) ($item['charge_amount'] ?? 0);
                 $quantity     = (int) ($item['quantity'] ?? 1);
                 $size         = $item['size'] ?? null;
+                $isExempted   = filter_var($item['is_exempted'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
                 $orFromItem   = $item['OR'] ?? $orNumber;
 
@@ -238,27 +241,83 @@ class StudentController extends Controller
                 $payableType  = $item['payable_type'];
                 $schoolYear   = $item['school_year'] ?? $student->school_year;
 
-                // Add size to payable name for Uniforms (makes it clear in records)
+                // Add size to uniform names
                 if ($payableType && strtolower($payableType) === 'uniforms' && $size) {
                     $payableName = "{$payableName} - Size {$size}";
                 }
 
+                /*
+                |--------------------------------------------------------------------------
+                | BIGAY / EXEMPTED
+                |--------------------------------------------------------------------------
+                */
+                if ($isExempted) {
+
+                    if (!empty($item['student_payable_id'])) {
+
+                        $studentPayable = StudentPayable::findOrFail(
+                            $item['student_payable_id']
+                        );
+
+                        $studentPayable->update([
+                            'amount'         => 0,
+                            'total_amount'   => 0,
+                            'paid_amount'    => 0,
+                            'penalty_amount' => 0,
+                            'status'         => 'exempted',
+                            'remarks'        => 'bigay',
+                        ]);
+
+                    } else {
+
+                        StudentPayable::create([
+                            'student_id'     => $student->id,
+                            'payable_id'     => $item['payable_id'],
+                            'payable_name'   => $payableName,
+                            'payable_type'   => $payableType,
+                            'grade_level'    => $student->grade_level,
+                            'school_year'    => $schoolYear,
+                            'amount'         => 0,
+                            'total_amount'   => 0,
+                            'paid_amount'    => 0,
+                            'penalty_amount' => 0,
+                            'due_date'       => now()->addDays(30),
+                            'status'         => 'exempted',
+                            'remarks'        => 'bigay',
+                        ]);
+                    }
+
+                    // Skip transaction creation
+                    continue;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | EXISTING PAYABLE
+                |--------------------------------------------------------------------------
+                */
                 if (!empty($item['student_payable_id'])) {
-                    // === EXISTING PAYABLE ===
-                    $studentPayable = StudentPayable::findOrFail($item['student_payable_id']);
+
+                    $studentPayable = StudentPayable::findOrFail(
+                        $item['student_payable_id']
+                    );
 
                     $penaltyAmount = (float) ($studentPayable->penalty_amount ?? 0);
 
-                    $studentPayable->paid_amount = ($studentPayable->paid_amount ?? 0) + $chargeAmount;
+                    $studentPayable->paid_amount =
+                        ($studentPayable->paid_amount ?? 0) + $chargeAmount;
 
                     if ($orFromItem) {
                         $studentPayable->OR = $orFromItem;
-                        $studentPayable->remarks = trim(($studentPayable->remarks ?? '') . " | OR: {$orFromItem}");
+                        $studentPayable->remarks = trim(
+                            ($studentPayable->remarks ?? '') . " | OR: {$orFromItem}"
+                        );
                     }
 
-                    $studentPayable->remarks = trim(($studentPayable->remarks ?? '') . " | OR: {$orFromItem}");
-
-                    if ($studentPayable->paid_amount >= $studentPayable->total_amount) {
+                    if (
+                        $studentPayable->paid_amount >=
+                        $studentPayable->total_amount
+                    ) {
                         $studentPayable->status = 'paid';
                     }
 
@@ -282,7 +341,13 @@ class StudentController extends Controller
                     $totalPenalty += $penaltyAmount;
 
                 } else {
-                    // === NEW REPEATABLE PURCHASE ===
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | NEW REPEATABLE PURCHASE
+                    |--------------------------------------------------------------------------
+                    */
+
                     $baseAmount = $chargeAmount / max($quantity, 1);
 
                     $studentPayable = StudentPayable::create([
@@ -299,7 +364,9 @@ class StudentController extends Controller
                         'due_date'       => now()->addDays(30),
                         'status'         => 'paid',
                         'OR'             => $orFromItem,
-                        'remarks'        => $size ? "Size: {$size} | Qty: {$quantity} | OR: {$orFromItem}" : "Qty: {$quantity} | OR: {$orFromItem}",
+                        'remarks'        => $size
+                            ? "Size: {$size} | Qty: {$quantity} | OR: {$orFromItem}"
+                            : "Qty: {$quantity} | OR: {$orFromItem}",
                     ]);
 
                     $payablesData[] = [
@@ -320,7 +387,23 @@ class StudentController extends Controller
                 }
             }
 
-            $transactionCode = 'TRX-' . date('Ymd') . '-' . str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT);
+            /*
+            |--------------------------------------------------------------------------
+            | NO TRANSACTION NEEDED (ALL BIGAY)
+            |--------------------------------------------------------------------------
+            */
+            if (empty($payablesData)) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Selected payables were marked as Bigay.',
+                ]);
+            }
+
+            $transactionCode =
+                'TRX-' .
+                date('Ymd') .
+                '-' .
+                str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT);
 
             $transaction = Transaction::create([
                 'student_id'       => $student->id,
@@ -328,7 +411,7 @@ class StudentController extends Controller
                 'total_amount'     => $totalAmount,
                 'total_penalty'    => $totalPenalty,
                 'payables'         => $payablesData,
-                'remarks'          => 'OR' . $orNumber,
+                'remarks'          => $orNumber ? 'OR: ' . $orNumber : null,
                 'created_by'       => auth()->id(),
             ]);
 
@@ -340,6 +423,7 @@ class StudentController extends Controller
             ]);
 
         } catch (\Exception $e) {
+
             return response()->json([
                 'success' => false,
                 'message' => 'Payment failed: ' . $e->getMessage()

@@ -28,6 +28,7 @@
                 <input type="hidden" :name="`selected_payables[${index}][quantity]`" :value="item.quantity || 1">
                 <input type="hidden" :name="`selected_payables[${index}][size]`" :value="item.size || ''">
                 <input type="hidden" :name="`selected_payables[${index}][OR]`" :value="item.OR || ''">
+                <input type="hidden" :name="`selected_payables[${index}][is_exempted]`" :value="item.is_exempted ? 1 : 0">
             </div>
         </template>
 
@@ -201,6 +202,16 @@
                                             </template>
                                         </select>
                                     </div>
+
+                                    <div x-show="isUniform(item)" class="mt-4">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="checkbox"
+                                                @change="toggleExempted(index, $event)"
+                                                :checked="item.is_exempted || false"
+                                                class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                            <span class="text-sm font-medium text-gray-700">Mark as Exempted (Bigay)</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </template>
 
@@ -251,7 +262,6 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Original Receipt (OR) Number</label>
                 <input
                     type="text"
-                    required
                     max="50"
                     x-model="orNumber"
                     name="or_number"

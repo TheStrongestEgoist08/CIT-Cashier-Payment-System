@@ -66,6 +66,8 @@
                 if (exists === -1) {
                     const newItem = { ...item };
 
+                    newItem.is_exempted = false;
+
                     if (newItem.is_repeatable) {
                         newItem.quantity = 1;
                         newItem.size = '';
@@ -106,6 +108,10 @@
                 }
 
                 item.charge_amount = price * (item.quantity || 1);
+            },
+
+            toggleExempted(index, event) {
+                this.selectedPayables[index].is_exempted = event.target.checked;
             },
 
             removePayable(index) {

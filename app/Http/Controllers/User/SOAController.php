@@ -231,185 +231,198 @@ class SOAController extends Controller
         return $pdf->stream('SOA_' . $selectedMonth->format('F_Y') . '.pdf');
     }
 
-    public function exportStudentSummaryOfAccount(Request $request)
-    {
-        $studentIds = $request->input('student_ids', []);
+public function exportStudentSummaryOfAccount(Request $request)
+{
+    $studentIds = $request->input('student_ids', []);
 
-        if (empty($studentIds)) {
-            return redirect()
-                ->route('admin.summary')
-                ->with('warning', 'No students selected.');
-        }
-
-        $students = Student::with([
-            'studentPayables' => function ($query) {
-                $query->orderBy('grade_level')
-                    ->orderBy('school_year', 'desc')
-                    ->orderBy('due_date', 'asc');
-            }
-        ])
-        ->whereIn('id', $studentIds)
-        ->get();
-
-        if ($students->isEmpty()) {
-            return redirect()->back()->with('warning', 'No students found.');
-        }
-
-        $soas = [];
-        $preparedBy = Auth::user()->name
-            ?? Auth::user()->username
-            ?? 'Cashier / Registrar';
-
-        foreach ($students as $student) {
-            $groupedData = [];
-
-            foreach ($student->studentPayables as $payable) {
-                $gradeLevel = $payable->grade_level ?? 'Unknown Grade';
-                $schoolYear = $payable->school_year ?? 'Unknown School Year';
-
-                // Initialize grouping structure
-                if (!isset($groupedData[$gradeLevel])) {
-                    $groupedData[$gradeLevel] = [];
-                }
-                if (!isset($groupedData[$gradeLevel][$schoolYear])) {
-                    $groupedData[$gradeLevel][$schoolYear] = [
-                        'paid'        => [],
-                        'unpaid'      => [],
-                        'paidTotal'   => 0,
-                        'unpaidTotal' => 0,
-                    ];
-                }
-
-                $balance = $payable->total_amount - $payable->paid_amount;
-
-                $item = [
-                    'payable_name'   => $payable->payable_name,
-                    'OR'            => $payable->OR ?? '-',
-                    'amount'         => (float) $payable->amount,
-                    'penalty_amount' => (float) $payable->penalty_amount,
-                    'paid_amount'    => (float) $payable->paid_amount,
-                    'total_amount'   => (float) $payable->total_amount,
-                    'balance'        => (float) $balance,
-                    'status'         => $payable->status,
-                    'due_date'       => $payable->due_date,
-                ];
-
-                if ($balance <= 0) {
-                    $groupedData[$gradeLevel][$schoolYear]['paid'][] = $item;
-                    $groupedData[$gradeLevel][$schoolYear]['paidTotal'] += $payable->total_amount;
-                } else {
-                    $groupedData[$gradeLevel][$schoolYear]['unpaid'][] = $item;
-                    $groupedData[$gradeLevel][$schoolYear]['unpaidTotal'] += $balance;
-                }
-            }
-
-            $soas[] = [
-                'student'      => $student,
-                'groupedData'  => $groupedData,
-                'generatedAt'  => now(),
-                'preparedBy'   => $preparedBy,
-            ];
-        }
-
-        $pdf = Pdf::loadView('summary.partials.summary-pdf', [
-            'soas' => $soas
-        ]);
-
-        $pdf->setPaper('A4', 'portrait');
-        $pdf->setOption('isHtml5ParserEnabled', true);
-        $pdf->setOption('isRemoteEnabled', true);
-        $pdf->setOption('isFontSubsettingEnabled', true);
-        $pdf->setOption('defaultFont', 'Times New Roman');
-
-        $filename = 'Summary_of_Account_' . now()->format('Y-m-d_His') . '.pdf';
-
-        return $pdf->download($filename);
+    if (empty($studentIds)) {
+        return redirect()
+            ->route('admin.summary')
+            ->with('warning', 'No students selected.');
     }
 
-    public function printStudentSummaryOfAccount(Request $request)
-    {
-        $studentIds = $request->input('student_ids', []);
-
-        if (empty($studentIds)) {
-            return redirect()->route('admin.summary')
-                ->with('warning', 'No students selected.');
+    $students = Student::with([
+        'studentPayables' => function ($query) {
+            $query->orderBy('grade_level')
+                ->orderBy('school_year', 'desc')
+                ->orderBy('due_date', 'asc');
         }
+    ])
+    ->whereIn('id', $studentIds)
+    ->get();
 
-        $students = Student::with([
-            'studentPayables' => function ($query) {
-                $query->orderBy('grade_level')
-                    ->orderBy('school_year', 'desc')
-                    ->orderBy('due_date');
-            }
-        ])
-        ->whereIn('id', $studentIds)
-        ->get();
-
-        $preparedBy = Auth::user()->name
-            ?? Auth::user()->username
-            ?? 'Cashier / Registrar';
-
-        $soas = [];
-
-        foreach ($students as $student) {
-            $groupedData = [];
-
-            foreach ($student->studentPayables as $payable) {
-                $gradeLevel = $payable->grade_level ?? 'Unknown Grade';
-                $schoolYear = $payable->school_year ?? 'Unknown School Year';
-
-                // Initialize structure
-                if (!isset($groupedData[$gradeLevel])) {
-                    $groupedData[$gradeLevel] = [];
-                }
-                if (!isset($groupedData[$gradeLevel][$schoolYear])) {
-                    $groupedData[$gradeLevel][$schoolYear] = [
-                        'paid'   => [],
-                        'unpaid' => [],
-                        'paidTotal'   => 0,
-                        'unpaidTotal' => 0,
-                    ];
-                }
-
-                $balance = $payable->total_amount - $payable->paid_amount;
-
-                $item = [
-                    'payable_name'   => $payable->payable_name,
-                    'OR'            => $payable->OR,
-                    'amount'         => (float) $payable->amount,
-                    'penalty_amount' => (float) $payable->penalty_amount,
-                    'paid_amount'    => (float) $payable->paid_amount,
-                    'total_amount'   => (float) $payable->total_amount,
-                    'balance'        => (float) $balance,
-                    'status'         => $payable->status,
-                ];
-
-                if ($balance <= 0) {
-                    $groupedData[$gradeLevel][$schoolYear]['paid'][] = $item;
-                    $groupedData[$gradeLevel][$schoolYear]['paidTotal'] += $payable->total_amount;
-                } else {
-                    $groupedData[$gradeLevel][$schoolYear]['unpaid'][] = $item;
-                    $groupedData[$gradeLevel][$schoolYear]['unpaidTotal'] += $balance;
-                }
-            }
-
-            $soas[] = [
-                'student'      => $student,
-                'groupedData'  => $groupedData,
-                'generatedAt'  => now(),
-                'preparedBy'   => $preparedBy,
-            ];
-        }
-
-        $pdf = Pdf::loadView('summary.partials.summary-pdf', [
-            'soas' => $soas
-        ]);
-
-        $pdf->setPaper('A4', 'portrait');
-        $pdf->setOption('isHtml5ParserEnabled', true);
-        $pdf->setOption('isRemoteEnabled', true);
-        $pdf->setOption('defaultFont', 'Times New Roman');
-
-        return $pdf->stream('Summary_of_Account_' . now()->format('Y-m-d') . '.pdf');
+    if ($students->isEmpty()) {
+        return redirect()->back()->with('warning', 'No students found.');
     }
+
+    $soas = [];
+    $preparedBy = Auth::user()->name
+        ?? Auth::user()->username
+        ?? 'Cashier / Registrar';
+
+    foreach ($students as $student) {
+        $groupedData = [];
+
+        foreach ($student->studentPayables as $payable) {
+            $gradeLevel = $payable->grade_level ?? 'Unknown Grade';
+            $schoolYear = $payable->school_year ?? 'Unknown School Year';
+
+            // Initialize grouping structure
+            if (!isset($groupedData[$gradeLevel])) {
+                $groupedData[$gradeLevel] = [];
+            }
+            if (!isset($groupedData[$gradeLevel][$schoolYear])) {
+                $groupedData[$gradeLevel][$schoolYear] = [
+                    'paid'       => [],
+                    'unpaid'     => [],
+                    'exempted'   => [],
+                    'paidTotal'   => 0,
+                    'unpaidTotal' => 0,
+                    'exemptedTotal' => 0,
+                ];
+            }
+
+            $balance = $payable->total_amount - $payable->paid_amount;
+
+            $item = [
+                'payable_name'   => $payable->payable_name,
+                'OR'             => $payable->OR ?? '-',
+                'amount'         => (float) $payable->amount,
+                'penalty_amount' => (float) $payable->penalty_amount,
+                'paid_amount'    => (float) $payable->paid_amount,
+                'total_amount'   => (float) $payable->total_amount,
+                'balance'        => (float) $balance,
+                'status'         => $payable->status,
+                'remarks'        => $payable->remarks ?? 'Exempted',   // You can change this
+            ];
+
+            // Determine category
+            if ($payable->status === 'exempted' || ($payable->is_exempted ?? false)) {
+                $groupedData[$gradeLevel][$schoolYear]['exempted'][] = $item;
+                $groupedData[$gradeLevel][$schoolYear]['exemptedTotal'] += $payable->total_amount;
+            } elseif ($balance <= 0) {
+                $groupedData[$gradeLevel][$schoolYear]['paid'][] = $item;
+                $groupedData[$gradeLevel][$schoolYear]['paidTotal'] += $payable->total_amount;
+            } else {
+                $groupedData[$gradeLevel][$schoolYear]['unpaid'][] = $item;
+                $groupedData[$gradeLevel][$schoolYear]['unpaidTotal'] += $balance;
+            }
+        }
+
+        $soas[] = [
+            'student'      => $student,
+            'groupedData'  => $groupedData,
+            'generatedAt'  => now(),
+            'preparedBy'   => $preparedBy,
+        ];
+    }
+
+    $pdf = Pdf::loadView('summary.partials.summary-pdf', [
+        'soas' => $soas
+    ]);
+
+    $pdf->setPaper('A4', 'portrait');
+    $pdf->setOption('isHtml5ParserEnabled', true);
+    $pdf->setOption('isRemoteEnabled', true);
+    $pdf->setOption('isFontSubsettingEnabled', true);
+    $pdf->setOption('defaultFont', 'Times New Roman');
+
+    $filename = 'Summary_of_Account_' . now()->format('Y-m-d_His') . '.pdf';
+
+    return $pdf->download($filename);
+}
+
+public function printStudentSummaryOfAccount(Request $request)
+{
+    $studentIds = $request->input('student_ids', []);
+
+    if (empty($studentIds)) {
+        return redirect()->route('admin.summary')
+            ->with('warning', 'No students selected.');
+    }
+
+    $students = Student::with([
+        'studentPayables' => function ($query) {
+            $query->orderBy('grade_level')
+                ->orderBy('school_year', 'desc')
+                ->orderBy('due_date');
+        }
+    ])
+    ->whereIn('id', $studentIds)
+    ->get();
+
+    $preparedBy = Auth::user()->name
+        ?? Auth::user()->username
+        ?? 'Cashier / Registrar';
+
+    $soas = [];
+
+    foreach ($students as $student) {
+        $groupedData = [];
+
+        foreach ($student->studentPayables as $payable) {
+            $gradeLevel = $payable->grade_level ?? 'Unknown Grade';
+            $schoolYear = $payable->school_year ?? 'Unknown School Year';
+
+            // Initialize structure
+            if (!isset($groupedData[$gradeLevel])) {
+                $groupedData[$gradeLevel] = [];
+            }
+            if (!isset($groupedData[$gradeLevel][$schoolYear])) {
+                $groupedData[$gradeLevel][$schoolYear] = [
+                    'paid'          => [],
+                    'unpaid'        => [],
+                    'exempted'      => [],
+                    'paidTotal'     => 0,
+                    'unpaidTotal'   => 0,
+                    'exemptedTotal' => 0,
+                ];
+            }
+
+            $balance = $payable->total_amount - $payable->paid_amount;
+
+            $item = [
+                'payable_name'   => $payable->payable_name,
+                'OR'             => $payable->OR ?? '-',
+                'amount'         => (float) $payable->amount,
+                'penalty_amount' => (float) $payable->penalty_amount,
+                'paid_amount'    => (float) $payable->paid_amount,
+                'total_amount'   => (float) $payable->total_amount,
+                'balance'        => (float) $balance,
+                'status'         => $payable->status,
+                'remarks'        => $payable->remarks ?? 'Exempted',
+            ];
+
+            // Categorize the payable
+            if ($payable->status === 'exempted' || ($payable->is_exempted ?? false)) {
+                $groupedData[$gradeLevel][$schoolYear]['exempted'][] = $item;
+                $groupedData[$gradeLevel][$schoolYear]['exemptedTotal'] += $payable->total_amount;
+            } elseif ($balance <= 0) {
+                $groupedData[$gradeLevel][$schoolYear]['paid'][] = $item;
+                $groupedData[$gradeLevel][$schoolYear]['paidTotal'] += $payable->total_amount;
+            } else {
+                $groupedData[$gradeLevel][$schoolYear]['unpaid'][] = $item;
+                $groupedData[$gradeLevel][$schoolYear]['unpaidTotal'] += $balance;
+            }
+        }
+
+        $soas[] = [
+            'student'      => $student,
+            'groupedData'  => $groupedData,
+            'generatedAt'  => now(),
+            'preparedBy'   => $preparedBy,
+        ];
+    }
+
+    $pdf = Pdf::loadView('summary.partials.summary-pdf', [
+        'soas' => $soas
+    ]);
+
+    $pdf->setPaper('A4', 'portrait');
+    $pdf->setOption('isHtml5ParserEnabled', true);
+    $pdf->setOption('isRemoteEnabled', true);
+    $pdf->setOption('defaultFont', 'Times New Roman');
+
+    return $pdf->stream('Summary_of_Account_' . now()->format('Y-m-d_His') . '.pdf');
+}
 }
