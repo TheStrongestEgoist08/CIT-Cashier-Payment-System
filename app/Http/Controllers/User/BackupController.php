@@ -7,6 +7,7 @@ use App\Models\BackupPath;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use App\Models\BackupSchedule;
+use Illuminate\Support\Facades\Auth;
 
 class BackupController extends Controller
 {
@@ -177,6 +178,9 @@ class BackupController extends Controller
             return back()->with('error', 'Backup file not found.');
         }
 
+        // Store current user ID before restore
+        $currentUserId = Auth::id();
+
         $database = config('database.connections.mysql.database');
 
         $command = sprintf(
@@ -194,7 +198,18 @@ class BackupController extends Controller
             return back()->with('error', 'Restore failed. Check error logs for details.');
         }
 
-        return back()->with('success', 'Database restored successfully!');
+        // Re-authenticate the user after restore
+        if ($currentUserId) {
+            $user = \App\Models\User::find($currentUserId);
+
+            if ($user) {
+                Auth::logout();           // Clear old session
+                Auth::login($user);       // Log back in with same user
+                session()->regenerate();  // Regenerate session ID for security
+            }
+        }
+
+        return back()->with('success', 'Database restored successfully! You have been re-authenticated.');
     }
 
     public function delete($filename)
@@ -256,46 +271,46 @@ class BackupController extends Controller
         return view('backup.index', compact('schedule', 'paths'));
     }
 
-public function updateSchedule(Request $request)
-{
-    $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
-        'is_enabled'      => 'nullable',
-        'frequency'       => 'required|in:daily,weekly,biweekly,monthly,quarterly,yearly',
-        'backup_time'     => 'required|date_format:H:i',   // Changed back + we'll handle it
-        'backup_path_id'  => 'required|exists:backup_paths,id',
-        'day_of_week'     => 'nullable|in:mon,tue,wed,thu,fri,sat,sun',
-        'day_of_month'    => 'nullable|integer|between:1,28',
-    ]);
-
-    if ($validator->fails()) {
-        dd([
-            'errors'        => $validator->errors()->all(),
-            'all_input'     => $request->all(),
-            'backup_time'   => $request->backup_time,
+    public function updateSchedule(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'is_enabled'      => 'nullable',
+            'frequency'       => 'required|in:daily,weekly,biweekly,monthly,quarterly,yearly',
+            'backup_time'     => 'required|date_format:H:i',
+            'backup_path_id'  => 'required|exists:backup_paths,id',
+            'day_of_week'     => 'nullable|in:mon,tue,wed,thu,fri,sat,sun',
+            'day_of_month'    => 'nullable|integer|between:1,28',
         ]);
+
+        if ($validator->fails()) {
+            dd([
+                'errors'        => $validator->errors()->all(),
+                'all_input'     => $request->all(),
+                'backup_time'   => $request->backup_time,
+            ]);
+        }
+
+        // Validation passed
+        $schedule = BackupSchedule::getSettings();
+
+        $updateData = [
+            'is_enabled'     => $request->boolean('is_enabled'),
+            'frequency'      => $request->frequency,
+            'backup_time'    => $request->backup_time . ':00',
+            'backup_path_id' => $request->backup_path_id,
+            'day_of_week'    => null,
+            'day_of_month'   => null,
+        ];
+
+        if (in_array($request->frequency, ['weekly', 'biweekly'])) {
+            $updateData['day_of_week'] = $request->day_of_week;
+        } elseif (in_array($request->frequency, ['monthly', 'quarterly', 'yearly'])) {
+            $updateData['day_of_month'] = $request->day_of_month;
+        }
+
+        $schedule->update($updateData);
+        $schedule->updateNextRun();
+
+        return back()->with('success', 'Backup schedule saved successfully!');
     }
-
-    // Validation passed
-    $schedule = BackupSchedule::getSettings();
-
-    $updateData = [
-        'is_enabled'     => $request->boolean('is_enabled'),
-        'frequency'      => $request->frequency,
-        'backup_time'    => $request->backup_time . ':00',
-        'backup_path_id' => $request->backup_path_id,
-        'day_of_week'    => null,
-        'day_of_month'   => null,
-    ];
-
-    if (in_array($request->frequency, ['weekly', 'biweekly'])) {
-        $updateData['day_of_week'] = $request->day_of_week;
-    } elseif (in_array($request->frequency, ['monthly', 'quarterly', 'yearly'])) {
-        $updateData['day_of_month'] = $request->day_of_month;
-    }
-
-    $schedule->update($updateData);
-    $schedule->updateNextRun();
-
-    return back()->with('success', 'Backup schedule saved successfully!');
-}
 }
