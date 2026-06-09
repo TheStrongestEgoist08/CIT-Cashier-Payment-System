@@ -56,6 +56,32 @@ class DashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Currnt Month Income
+        |--------------------------------------------------------------------------
+        */
+
+        $currentMonthIncome = Transaction::whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->sum('total_amount');
+
+        $lastMonthIncome = Transaction::whereYear(
+                'created_at',
+                now()->copy()->subMonth()->year
+            )
+            ->whereMonth(
+                'created_at',
+                now()->copy()->subMonth()->month
+            )
+            ->sum('total_amount');
+
+        if ($lastMonthIncome > 0) {
+            $incomePercentageChange = (($currentMonthIncome - $lastMonthIncome) / $lastMonthIncome) * 100;
+        } else {
+            $incomePercentageChange = $currentMonthIncome > 0 ? 100 : 0;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Recent Transactions
         |--------------------------------------------------------------------------
         */
@@ -82,7 +108,8 @@ class DashboardController extends Controller
             'incomeThisYear',
             'transactionsThisMonth',
             'totalPenalties',
-            'recentTransactions'
+            'recentTransactions',
+            'incomePercentageChange',
         ));
     }
 }

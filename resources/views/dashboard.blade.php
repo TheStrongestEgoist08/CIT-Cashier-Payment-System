@@ -21,8 +21,21 @@
                             <h3 class="text-3xl font-bold text-emerald-600 mt-3">
                                 ₱{{ number_format($incomeThisMonth, 2) }}
                             </h3>
-                            <div class="flex items-center gap-1 mt-2 text-emerald-600 text-sm font-medium">
-                                <span>↑ 12%</span>
+                            <div class="flex items-center gap-1 mt-2 text-sm font-medium">
+                                @if($incomePercentageChange > 0)
+                                    <span class="text-emerald-600">
+                                        ↑ {{ number_format($incomePercentageChange, 0) }}%
+                                    </span>
+                                @elseif($incomePercentageChange < 0)
+                                    <span class="text-rose-600">
+                                        ↓ {{ number_format(abs($incomePercentageChange), 0) }}%
+                                    </span>
+                                @else
+                                    <span class="text-slate-500">
+                                        0%
+                                    </span>
+                                @endif
+
                                 <span class="text-slate-400">from last month</span>
                             </div>
                         </div>
