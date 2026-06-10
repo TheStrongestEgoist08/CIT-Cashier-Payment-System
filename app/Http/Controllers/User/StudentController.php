@@ -283,7 +283,7 @@ class StudentController extends Controller
                             'penalty_amount' => 0,
                             'due_date'       => now()->addDays(30),
                             'status'         => 'exempted',
-                            'remarks'        => 'bigay',
+                            'remarks'        => 'bigay/labas',
                         ]);
                     }
 
