@@ -87,6 +87,10 @@ Route::controller(Transaction::class)->middleware(['auth', 'verified', 'role:bot
     Route::get('/transactions/{transaction}', 'show')
         ->name('transactions.show');
 
+    Route::get('/transactions/print/{id}', 'print')
+        ->name('transactions.print')
+        ->middleware('auth');
+
 });
 
 # SOA Routes

@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Transaction;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Crypt;
+
 class TransactionController extends Controller
 {
     public function index(Request $request)
@@ -35,4 +38,25 @@ class TransactionController extends Controller
             'transaction' => $transaction
         ]);
     }
+
+    public function print($id)
+    {
+        $transaction = Transaction::findOrFail($id);
+
+        $transaction = Transaction::findOrFail($id);
+
+        $pdf = Pdf::loadView('transactions.partials.pdf', [
+            'transaction' => $transaction,
+        ])
+        ->setPaper([0, 0, 164, 595], 'portrait')
+        ->setOption('margin_top', 0)
+        ->setOption('margin_right', 0)
+        ->setOption('margin_bottom', 0)
+        ->setOption('margin_left', 0);
+
+        return $pdf->stream(
+            'transaction_' . $transaction->transaction_code ?? $transaction->id . '.pdf'
+        );
+    }
+
 }

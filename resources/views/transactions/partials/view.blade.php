@@ -286,7 +286,7 @@
                     </p>
 
                     <p class="text-sm text-slate-500 mt-2">
-                        This document serves as your official receipt.
+                        Disregard this bill if the payment has already been made.
                     </p>
 
                 </div>
@@ -298,13 +298,18 @@
         <!-- Fixed Footer -->
         <div class="flex-shrink-0 bg-white border-t p-5 flex justify-end gap-3">
 
-            <button
-                type="button"
-                onclick="window.print()"
-                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition"
+            <a
+                :href="`{{ url('/transactions/print') }}/${selectedTransaction.id}`"
+                target="_blank"
             >
-                Print Receipt
-            </button>
+                <button
+                    type="button"
+                    class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition"
+                >
+                    Print Receipt
+                </button>
+            </a>
+
 
             <button
                 @click="viewModal = false"

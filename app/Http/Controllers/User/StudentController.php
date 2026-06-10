@@ -419,7 +419,8 @@ class StudentController extends Controller
                 'success'          => true,
                 'message'          => 'Payment recorded successfully.',
                 'transaction_code' => $transactionCode,
-                'transaction_id'   => $transaction->id
+                'transaction_id'   => $transaction->id,
+                'print_url'        => url('/transactions/print/' . $transaction->id)
             ]);
 
         } catch (\Exception $e) {
