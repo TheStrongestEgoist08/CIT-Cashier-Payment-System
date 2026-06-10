@@ -29,17 +29,10 @@
             </div>
 
             @if (Auth::check())
-                @if (Auth::user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}"
-                       class="px-6 py-3 bg-white text-blue-950 font-semibold rounded-xl hover:bg-yellow-300 hover:text-blue-950 transition-all duration-200 shadow-lg">
-                        Admin Dashboard
-                    </a>
-                @elseif (Auth::user()->role === 'cashier')
-                    <a href="{{ route('cashier.summary') }}"
-                       class="px-6 py-3 bg-white text-blue-950 font-semibold rounded-xl hover:bg-yellow-300 hover:text-blue-950 transition-all duration-200 shadow-lg">
-                        Cashier Dashboard
-                    </a>
-                @endif
+                <a href="{{ route('dashboard') }}"
+                    class="px-6 py-3 bg-white text-blue-950 font-semibold rounded-xl hover:bg-yellow-300 hover:text-blue-950 transition-all duration-200 shadow-lg">
+                    Dashboard
+                </a>
             @else
                 <a href="{{ route('login') }}"
                    class="px-6 py-3 bg-white text-blue-950 font-semibold rounded-xl hover:bg-yellow-300 hover:text-blue-950 transition-all duration-200 shadow-lg">
@@ -74,17 +67,10 @@
 
                 <div class="flex flex-wrap gap-4 pt-4">
                     @if (Auth::check())
-                        @if (Auth::user()->role === 'admin')
-                            <a href="{{ route('admin.dashboard') }}"
-                               class="px-8 py-6 bg-white text-blue-950 font-semibold text-lg rounded-2xl hover:bg-yellow-300 hover:text-blue-950 transition-all duration-300 shadow-xl inline-block">
-                                Access System
-                            </a>
-                        @elseif (Auth::user()->role === 'cashier')
-                            <a href="{{ route('cashier.summary') }}"
-                               class="px-8 py-6 bg-white text-blue-950 font-semibold text-lg rounded-2xl hover:bg-yellow-300 hover:text-blue-950 transition-all duration-300 shadow-xl inline-block">
-                                Access System
-                            </a>
-                        @endif
+                        <a href="{{ route('dashboard') }}"
+                            class="px-8 py-6 bg-white text-blue-950 font-semibold text-lg rounded-2xl hover:bg-yellow-300 hover:text-blue-950 transition-all duration-300 shadow-xl inline-block">
+                            Access System
+                        </a>
                     @else
                         <a href="{{ route('login') }}"
                            class="px-8 py-6 bg-white text-blue-950 font-semibold text-lg rounded-2xl hover:bg-yellow-300 hover:text-blue-950 transition-all duration-300 shadow-xl inline-block">
