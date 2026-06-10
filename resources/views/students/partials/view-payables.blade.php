@@ -36,8 +36,10 @@
         <header class="bg-gradient-to-r from-indigo-700 via-blue-700 to-blue-600 px-8 py-6 flex justify-between items-center rounded-t-3xl">
             <div>
                 <h2 class="text-2xl font-semibold text-white tracking-tight">Create Payment</h2>
-                <p class="text-blue-100 text-sm mt-1"
-                   x-text="selectedStudent ? `${selectedStudent.student_id || selectedStudent.id} - ${selectedStudent.complete_name}` : ''"></p>
+                <p
+                    class="text-blue-100 text-sm mt-1"
+                    x-text="selectedStudent ? `${selectedStudent.student_id || selectedStudent.id} - ${selectedStudent.complete_name}${selectedStudent.sex ? ` (${selectedStudent.sex})` : ''}` : ''"
+                ></p>
             </div>
             <button @click="viewModal = false; resetSelection()" type="button"
                     class="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/20 hover:bg-white/30 text-white text-2xl leading-none">×</button>
