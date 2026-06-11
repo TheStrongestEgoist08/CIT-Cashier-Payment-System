@@ -258,10 +258,9 @@
         </div>
 
         <!-- FOOTER -->
-        <div class="border-t p-6 bg-white rounded-b-3xl flex flex-col md:flex-row gap-4 items-end">
+        <div class="border-t px-6 py-4 bg-white rounded-b-3xl flex flex-col md:flex-row gap-4 items-end">
             <!-- OR Number -->
             <div class="flex-1 w-full md:w-auto">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Original Receipt (OR) Number</label>
                 <input
                     type="text"
                     max="50"
@@ -270,7 +269,6 @@
                     @input="applyORToAll()"
                     placeholder="Enter OR Number (optional)"
                     class="w-full border border-gray-300 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-medium">
-                <p class="text-xs text-gray-500 mt-1">This OR will be applied to all selected items</p>
             </div>
 
             <!-- Action Buttons -->

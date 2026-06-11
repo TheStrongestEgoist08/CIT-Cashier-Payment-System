@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ env('APP_NAME') }}</title>
-    <link rel="icon" type="image/x-icon" href="{{ asset('storage/icons/CITLOGOV1.png') }}">
+    <link rel="icon" type="image/x-icon" href="{{ asset('storage/logofavicon/logo3.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
