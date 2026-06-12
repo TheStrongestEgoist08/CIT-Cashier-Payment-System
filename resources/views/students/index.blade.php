@@ -258,8 +258,21 @@
 
                     if (res.ok && data.success) {
                         this.viewModal = false;
+
+                        if (data.print_url) {
+                            const iframe = document.createElement('iframe');
+                            iframe.style.display = 'none';
+                            iframe.src = data.print_url;
+
+                            iframe.onload = function () {
+                                iframe.contentWindow.focus();
+                                iframe.contentWindow.print();
+                            };
+
+                            document.body.appendChild(iframe);
+                        }
+
                         alert('Payment recorded successfully.');
-                        window.location.reload();
                     } else {
                         alert(data.message || `Payment failed (${res.status})`);
                     }
@@ -420,11 +433,13 @@
             @include('students.partials.view-payables')
         </div>
     </div>
+
+    <script>
+        function clearFilters() {
+            document.getElementById('filterForm').reset();
+            window.location.href = "{{ route('students') }}";
+        }
+    </script>
 </x-app-layout>
 
-<script>
-    function clearFilters() {
-        document.getElementById('filterForm').reset();
-        window.location.href = "{{ route('students') }}";
-    }
-</script>
+

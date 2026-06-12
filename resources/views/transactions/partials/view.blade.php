@@ -297,26 +297,28 @@
 
         <!-- Fixed Footer -->
         <div class="flex-shrink-0 bg-white border-t p-5 flex justify-end gap-3">
+            <button
+                type="button"
+                @click="
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.src = `{{ url('/transactions/print') }}/${selectedTransaction.id}`;
 
-            <a
-                :href="`{{ url('/transactions/print') }}/${selectedTransaction.id}`"
-                target="_blank"
-            >
-                <button
-                    type="button"
-                    class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition"
-                >
-                    Print Receipt
-                </button>
-            </a>
+                    iframe.onload = () => {
+                        iframe.contentWindow.focus();
+                        iframe.contentWindow.print();
+                    };
+
+                    document.body.appendChild(iframe);
+                "
+                class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition"
+            >Print Receipt</button>
 
 
             <button
                 @click="viewModal = false"
                 class="px-6 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium transition"
-            >
-                Close
-            </button>
+            >Close</button>
 
         </div>
 
