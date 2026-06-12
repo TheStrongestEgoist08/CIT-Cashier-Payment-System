@@ -1,11 +1,56 @@
 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
     <div class="p-6">
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Payables</h3>
-            <button @click="createModalOpen = true"
-                    class="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-                + Add Payable
-            </button>
+
+            <div class="flex flex-col sm:flex-row gap-3 items-center">
+                <form method="GET" action="{{ route('payables') }}" class="flex gap-2">
+                    {{-- Search by name --}}
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Search payable..."
+                        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    >
+
+                    {{-- Filter by type --}}
+                    <select
+                        name="type"
+                        class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    >
+                        <option value="">All Types</option>
+                        <option value="tuition" {{ request('type') == 'tuition' ? 'selected' : '' }}>Tuition</option>
+                        <option value="enrollment" {{ request('type') == 'enrollment' ? 'selected' : '' }}>Enrollment</option>
+                        <option value="assessment" {{ request('type') == 'assessment' ? 'selected' : '' }}>Assessment</option>
+                        <option value="uniforms" {{ request('type') == 'uniforms' ? 'selected' : '' }}>Uniforms</option>
+                        <option value="electricity" {{ request('type') == 'electricity' ? 'selected' : '' }}>Electricity</option>
+                        <option value="graduation" {{ request('type') == 'graduation' ? 'selected' : '' }}>Graduation</option>
+                        <option value="others" {{ request('type') == 'others' ? 'selected' : '' }}>Others</option>
+                    </select>
+
+                    <button
+                        type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                        Filter
+                    </button>
+
+                    <a
+                        href="{{ route('payables') }}"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                    >
+                        Clear
+                    </a>
+                </form>
+
+                <button
+                    @click="createModalOpen = true"
+                    class="px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                >
+                    + Add Payable
+                </button>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
