@@ -81,9 +81,14 @@
 
                                                 <!-- PAID Ribbon -->
                                                 <template x-if="!item.is_repeatable && (item.status === 'paid')">
-                                                    <div class="absolute -right-8 top-6 rotate-45 bg-emerald-600 text-white text-xs font-bold px-10 py-1 shadow-md z-10"
-                                                         style="transform: rotate(45deg);">
+                                                    <div class="absolute -right-8 top-6 rotate-45 bg-emerald-600 text-white text-xs font-bold px-10 py-1 shadow-md z-10" style="transform: rotate(45deg);">
                                                         PAID
+                                                    </div>
+                                                </template>
+
+                                                <template x-if="item.status === 'exempted'">
+                                                    <div class="absolute -right-8 top-6 rotate-45 bg-amber-600 text-white text-xs font-bold px-10 py-1 shadow-md z-10" style="transform: rotate(45deg);">
+                                                        Bigay/Labas
                                                     </div>
                                                 </template>
 
@@ -97,7 +102,7 @@
 
                                                 <div class="mt-auto pt-6 space-y-3">
                                                     <div>
-                                                        <p class="text-xs text-gray-500">Balance</p>
+                                                        <p class="text-xs text-gray-500">Price</p>
                                                         <p class="text-2xl font-bold text-emerald-600"
                                                            x-text="'₱' + Number(item.amount || (Number(item.charge_amount) + Number(item.penalty_amount || 0))).toLocaleString('en-PH', {minimumFractionDigits: 2})"></p>
                                                     </div>

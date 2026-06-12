@@ -180,7 +180,8 @@ class StudentController extends Controller
         }
     }
 
-    public function getPayables(Student $student)
+    /*
+    public function getPayabless(Student $student)
     {
         $student->load('studentPayables');
 
@@ -226,6 +227,89 @@ class StudentController extends Controller
                     'details'           => $payable->details,
                 ];
             })->values();
+
+        return response()->json([
+            'student'              => $student,
+            'non_repeatables'      => $nonRepeatablePayables,
+            'repeatables'          => $repeatablePayables,
+        ]);
+    }
+    */
+
+    public function getPayables(Student $student)
+    {
+        $student->load('studentPayables');
+
+        // === NON-REPEATABLE (Existing Student Payables) ===
+        $nonRepeatablePayables = $student->studentPayables
+            ->where('is_repeatable', false)
+            ->map(function ($sp) {
+                return [
+                    'id'                => $sp->id,
+                    'payable_id'        => $sp->payable_id,
+                    'payable_name'      => $sp->payable_name,
+                    'payable_type'      => $sp->payable_type,
+                    'school_year'       => $sp->school_year,
+                    'grade_level'       => $sp->grade_level,
+                    'amount'            => $sp->amount,
+                    'penalty_amount'    => $sp->penalty_amount,
+                    'total_amount'      => $sp->total_amount,
+                    'paid_amount'       => $sp->paid_amount,
+                    'status'            => $sp->status,
+                    'remarks'           => $sp->remarks,
+                    'is_repeatable'     => false,
+                    'details'           => null,
+                ];
+            })->values();
+
+        // === REPEATABLE Payables (for new purchases) ===
+        $repeatablePayables = Payable::where('is_repeatable', true)
+            ->get()
+            ->map(function ($payable) use ($student) {
+                $details = $payable->details;
+
+                if ($payable->type === 'uniforms' && is_array($details) && isset($details['sex'])) {
+                    $studentSex = strtoupper(trim($student->sex ?? ''));
+                    $payableSex = strtoupper(trim($details['sex'] ?? ''));
+
+                    if (!empty($payableSex) && $payableSex !== 'BOTH' && $payableSex !== 'UNISEX' && $payableSex !== $studentSex) {
+                        return null;
+                    }
+
+                    if (isset($details['sizes']) && is_array($details['sizes'])) {
+                        $filteredSizes = collect($details['sizes'])
+                            ->filter(function ($sizeItem) use ($studentSex, $payableSex) {
+                                if (empty($sizeItem['sex'] ?? null)) {
+                                    return true;
+                                }
+                                $sizeSex = strtoupper(trim($sizeItem['sex']));
+                                return $sizeSex === 'BOTH' || $sizeSex === 'UNISEX' || $sizeSex === $studentSex;
+                            })
+                            ->values()
+                            ->all();
+
+                        $details['sizes'] = $filteredSizes;
+                    }
+                }
+
+                return [
+                    'id'                => null,
+                    'payable_id'        => $payable->id,
+                    'payable_name'      => $payable->name,
+                    'payable_type'      => $payable->type,
+                    'school_year'       => $payable->school_year ?? $student->school_year,
+                    'grade_level'       => $student->grade_level,
+                    'amount'            => 0,
+                    'penalty_amount'    => 0,
+                    'total_amount'      => 0,
+                    'paid_amount'       => 0,
+                    'status'            => 'pending',
+                    'is_repeatable'     => true,
+                    'details'           => $details,
+                ];
+            })
+            ->filter()
+            ->values();
 
         return response()->json([
             'student'              => $student,
