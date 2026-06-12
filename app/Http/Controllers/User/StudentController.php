@@ -73,13 +73,13 @@ class StudentController extends Controller
 
         try {
             $studentsImported = collect();
+            $studentsForAssignment = collect();
 
             $currentYear = (int) date('Y');
-            # $fallbackSchoolYear = $currentYear . '-' . ($currentYear + 1);
             $fallbackSchoolYear = '2025-2026';
             $fallbackGradeLevel = 'Grade 11';
 
-            (new FastExcel)->import($request->file('file'), function ($line) use (&$studentsImported, $fallbackSchoolYear, $fallbackGradeLevel) {
+            (new FastExcel)->import($request->file('file'), function ($line) use (&$studentsImported, &$studentsForAssignment, $fallbackSchoolYear, $fallbackGradeLevel) {
 
                 $student_id = trim($line['STUDENT NUMBER'] ?? $line['Student Number'] ?? $line['student_number'] ?? '');
                 $lrn        = trim($line['LRN'] ?? '');
@@ -118,10 +118,13 @@ class StudentController extends Controller
                     $schoolYear = $fallbackSchoolYear;
                 }
 
+                // Check existing student for school year comparison
+                $existingStudent = Student::where('LRN', $lrn)->first();
+
                 $student = Student::updateOrCreate(
-                    ['student_id' => $student_id],
+                    ['LRN' => $lrn],
                     [
-                        'LRN'            => $lrn,
+                        'student_id'     => $student_id,
                         'complete_name'  => $line['Complete name 1'] ?? $line['Complete Name 1'] ?? $line['Name'] ?? null,
                         'sex'            => $line['Sex'] ?? $line['sex'] ?? null,
                         'grade_level'    => $grade_level,
@@ -132,17 +135,43 @@ class StudentController extends Controller
                     ]
                 );
 
+                // Track all imported/updated students
                 $studentsImported->push($student);
+
+                // Determine if payable assignment is needed
+                $needsAssignment = false;
+
+                if ($student->wasRecentlyCreated) {
+                    $needsAssignment = true;
+                } elseif ($existingStudent && $existingStudent->school_year !== $schoolYear) {
+                    $needsAssignment = true;
+                }
+
+                if ($needsAssignment) {
+                    $studentsForAssignment->push($student);
+                }
             });
 
-            if ($studentsImported->isNotEmpty()) {
+            // Run payable assignment only when needed
+            if ($studentsForAssignment->isNotEmpty()) {
                 $service = app(PayableAssignmentService::class);
-                $service->assignForStudents($studentsImported);
+                $service->assignForStudents($studentsForAssignment);
             }
 
-            $message = $studentsImported->count() > 0
-                ? $studentsImported->count() . ' students imported and payables assigned successfully!'
-                : 'No valid students found to import.';
+            $totalImported = $studentsImported->count();
+            $assignedCount = $studentsForAssignment->count();
+
+            // Improved success message
+            if ($totalImported > 0) {
+                $message = "{$totalImported} students imported/updated successfully.";
+                if ($assignedCount > 0) {
+                    $message .= " {$assignedCount} of them received payable assignment.";
+                } else {
+                    $message .= " No new payable assignments were needed.";
+                }
+            } else {
+                $message = 'No valid students found to import.';
+            }
 
             return back()->with('success', $message);
 
