@@ -181,8 +181,7 @@
                                     <p class="font-medium" x-text="item.payable_name"></p>
                                     <p class="text-xs text-gray-500" x-text="item.school_year"></p>
                                 </div>
-                                <button type="button" @click="removePayable(index)"
-                                        class="text-red-500 hover:text-red-600 text-sm">Remove</button>
+                                <button type="button" @click="removePayable(index)" class="text-red-500 hover:text-red-600 text-sm">Remove</button>
                             </div>
 
                             <!-- Repeatable Config -->
