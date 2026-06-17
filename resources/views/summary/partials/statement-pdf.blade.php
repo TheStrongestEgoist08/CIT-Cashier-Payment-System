@@ -116,6 +116,14 @@
             border-top: 1px solid #333;
             margin: 0 auto 4px;
         }
+
+        .disclaimer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 8.5px;
+            color: #555;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -214,6 +222,13 @@
                         <div class="signature">
                             <div class="signature-line"></div>
                             <small>{{ $preparedBy ?? 'Cashier / Registrar' }}</small>
+                            <br>
+                            <small>Cashier / Registrar</small>
+                        </div>
+
+                        <!-- DISCLAIMER MESSAGE -->
+                        <div class="disclaimer">
+                            Please disregard this statement if payment has already been made.
                         </div>
 
                     </div>
