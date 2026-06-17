@@ -115,7 +115,7 @@ Route::controller(SOA::class)->middleware(['auth', 'verified', 'role:both', 'act
 });
 
 # Report Routes
-Route::controller(Report::class)->middleware(['auth', 'verified', 'role:admin', 'activity.log'])->group(function() {
+Route::controller(Report::class)->middleware(['auth', 'verified', 'role:both', 'activity.log'])->group(function() {
 
     Route::get('/reports', 'index')
         ->name('reports');

@@ -347,10 +347,12 @@
                                     Clear
                                 </button>
 
-                                <button type="button" onclick="document.getElementById('importModal').showModal()"
-                                        class="bg-green-600 text-white px-5 py-2.5 rounded-lg whitespace-nowrap">
-                                    Import Students
-                                </button>
+                                @if (Auth::user()->role === 'admin')
+                                    <button type="button" onclick="document.getElementById('importModal').showModal()"
+                                            class="bg-green-600 text-white px-5 py-2.5 rounded-lg whitespace-nowrap">
+                                        Import Students
+                                    </button>
+                                @endif
                             </div>
                         </form>
                     </div>

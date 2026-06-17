@@ -38,12 +38,10 @@
                         {{ __('SOA') }}
                     </x-nav-link>
 
-                    @if($userRole === 'admin')
-                        <x-nav-link :href="route('reports')" :active="request()->routeIs('reports')">
-                            {{ __('Reports') }}
-                        </x-nav-link>
-                    @endif
-
+                    <x-nav-link :href="route('reports')" :active="request()->routeIs('reports')">
+                        {{ __('Reports') }}
+                    </x-nav-link>
+                    
                     @if($userRole === 'admin')
                         <x-nav-link :href="route('accounts')" :active="request()->routeIs('accounts')">
                             {{ __('Accounts') }}
