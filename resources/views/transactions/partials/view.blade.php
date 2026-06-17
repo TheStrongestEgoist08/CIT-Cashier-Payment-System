@@ -285,10 +285,6 @@
                         Thank you for your payment.
                     </p>
 
-                    <p class="text-sm text-slate-500 mt-2">
-                        Disregard this bill if the payment has already been made.
-                    </p>
-
                 </div>
 
             </div>

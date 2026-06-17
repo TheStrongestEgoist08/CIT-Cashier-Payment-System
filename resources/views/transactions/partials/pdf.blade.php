@@ -274,7 +274,7 @@
         <div class="signature-line"></div>
         <div class="footer">
             Cashier / Authorized Personnel<br>
-            Disregard this bill if the payment has already been made.
+            Thank you for your payment.
         </div>
     </div>
 </body>
