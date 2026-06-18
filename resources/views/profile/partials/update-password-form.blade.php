@@ -15,19 +15,42 @@
 
         <div>
             <x-input-label for="update_password_current_password" :value="__('Current Password')" />
-            <x-text-input id="update_password_current_password" name="current_password" type="password" class="mt-1 block w-full" autocomplete="current-password" />
+            <x-text-input
+                id="update_password_current_password"
+                name="current_password"
+                type="password"
+                class="mt-1 block w-full"
+                autocomplete="current-password" />
             <x-input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
         </div>
 
         <div>
             <x-input-label for="update_password_password" :value="__('New Password')" />
-            <x-text-input id="update_password_password" name="password" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <x-text-input
+                id="update_password_password"
+                name="password"
+                type="password"
+                class="mt-1 block w-full"
+                minlength="8"
+                maxlength="25"
+                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,25}$"
+                title="Password must be 8-25 characters long, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character."
+                autocomplete="new-password" />
             <x-input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
         </div>
 
         <div>
             <x-input-label for="update_password_password_confirmation" :value="__('Confirm Password')" />
-            <x-text-input id="update_password_password_confirmation" name="password_confirmation" type="password" class="mt-1 block w-full" autocomplete="new-password" />
+            <x-text-input
+                id="update_password_password_confirmation"
+                name="password_confirmation"
+                type="password"
+                minlength="8"
+                maxlength="25"
+                pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,25}$"
+                title="Password must be 8-25 characters long, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character."
+                class="mt-1 block w-full"
+                autocomplete="new-password" />
             <x-input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
         </div>
 

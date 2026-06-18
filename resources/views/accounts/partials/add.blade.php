@@ -10,9 +10,11 @@
     <!-- Modal -->
     <div class="relative z-[110] bg-white rounded-3xl shadow-2xl w-full max-w-lg h-[90vh] flex flex-col">
 
-        <form method="POST"
-              action="{{ route('accounts.store') }}"
-              class="flex flex-col h-full">
+        <form
+            method="POST"
+            action="{{ route('accounts.store') }}"
+            class="flex flex-col h-full"
+        >
             @csrf
 
             <!-- Header -->
@@ -52,16 +54,29 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Password
                         </label>
-                        <input type="password" name="password" required
-                               class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500">
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                            class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500"
+                            minlength="8" maxlength="25"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,25}$"
+                            title="Password must be 8-25 characters long, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character."
+                        >
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Confirm Password
                         </label>
-                        <input type="password" name="password_confirmation" required
-                               class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500">
+                        <input
+                            type="password"
+                            name="password_confirmation" required
+                            class="w-full px-5 py-4 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500"
+                            minlength="8" maxlength="25"
+                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,25}$"
+                            title="Password must be 8-25 characters long, contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character."
+                        >
                     </div>
 
                     <div>
