@@ -2,7 +2,8 @@
 <x-app-layout>
     <div
         x-data="{
-            viewModal: false,
+            paymentModal: false,
+            viewOnlyModal: false,
             selectedStudent: null,
             nonRepeatables: [],
             repeatables: [],
@@ -20,10 +21,25 @@
                     this.repeatables = data.repeatables || [];
                     this.selectedPayables = [];
                     this.orNumber = '';
-                    this.viewModal = true;
+                    this.paymentModal = true;
                 } catch (error) {
                     console.error(error);
                     alert('Failed to load payables. Please check your internet or backend route.');
+                }
+            },
+
+            async openViewOnlyModal(studentId) {
+                try {
+                    const response = await fetch(`/students/${studentId}/payables`);
+                    const data = await response.json();
+
+                    this.selectedStudent = data.student;
+                    this.nonRepeatables = data.non_repeatables || [];
+                    this.repeatables = data.repeatables || [];
+                    this.viewOnlyModal = true;
+                } catch (error) {
+                    console.error(error);
+                    alert('Failed to load student account details.');
                 }
             },
 
@@ -257,7 +273,7 @@
                     }
 
                     if (res.ok && data.success) {
-                        this.viewModal = false;
+                        this.paymentModal = false;
 
                         if (data.print_url) {
                             const iframe = document.createElement('iframe');
@@ -403,15 +419,29 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <button
-                                                @click="openPaymentModal({{ $student->id }})"
-                                                class="text-blue-600 hover:text-blue-800 transition-colors p-1"
-                                                title="View Payables">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5 16.477 5 20.268 7.943 21.542 12 20.268 16.057 16.477 19 12 19 7.523 19 3.732 16.057 2.458 12z" />
-                                                </svg>
-                                            </button>
+                                            @if(Auth::user()->role === 'admin')
+                                                <button
+                                                    @click="openViewOnlyModal({{ $student->id }})"
+                                                    class="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                                                    title="View Account"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5 16.477 5 20.268 7.943 21.542 12 20.268 16.057 16.477 19 12 19 7.523 19 3.732 16.057 2.458 12z" />
+                                                    </svg>
+                                                </button>
+                                            @else
+                                                <button
+                                                    @click="openPaymentModal({{ $student->id }})"
+                                                    class="text-blue-600 hover:text-blue-800 transition-colors p-1"
+                                                    title="View Payables"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5 16.477 5 20.268 7.943 21.542 12 20.268 16.057 16.477 19 12 19 7.523 19 3.732 16.057 2.458 12z" />
+                                                    </svg>
+                                                </button>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -432,7 +462,8 @@
             </div>
 
             @include('students.partials.import')
-            @include('students.partials.view-payables')
+            @include('students.partials.payment-modal')
+            @include('students.partials.view-student-payables')
         </div>
     </div>
 
@@ -443,5 +474,3 @@
         }
     </script>
 </x-app-layout>
-
-

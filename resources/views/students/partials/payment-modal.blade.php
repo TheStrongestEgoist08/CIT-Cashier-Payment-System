@@ -1,10 +1,11 @@
-{{-- Student Payables Modal --}}
+
+{{-- Student Payables Modal / view-payables --}}
 <div
     x-cloak
-    x-show="viewModal"
+    x-show="paymentModal"
     x-transition.opacity.duration.400
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md"
-    @keydown.escape.window="viewModal = false; resetSelection()"
+    @keydown.escape.window="paymentModal = false; resetSelection()"
 >
     <form
         method="POST"
@@ -41,7 +42,7 @@
                     x-text="selectedStudent ? `${selectedStudent.student_id || selectedStudent.id} - ${selectedStudent.complete_name}${selectedStudent.sex ? ` (${selectedStudent.sex})` : ''}` : ''"
                 ></p>
             </div>
-            <button @click="viewModal = false; resetSelection()" type="button"
+            <button @click="paymentModal = false; resetSelection()" type="button"
                     class="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/20 hover:bg-white/30 text-white text-2xl leading-none">×</button>
         </header>
 
@@ -277,7 +278,7 @@
 
             <!-- Action Buttons -->
             <div class="flex gap-4">
-                <button type="button" @click="viewModal = false; resetSelection()"
+                <button type="button" @click="paymentModal = false; resetSelection()"
                         class="px-8 py-3 rounded-2xl font-medium text-gray-600 hover:bg-gray-100 whitespace-nowrap">
                     Cancel
                 </button>

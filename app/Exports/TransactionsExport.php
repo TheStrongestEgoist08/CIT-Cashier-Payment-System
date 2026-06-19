@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Style\Protection;
 
 class TransactionsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithEvents
 {
@@ -154,6 +155,13 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
                 ]);
 
                 $sheet->getStyle('D' . '2:' . 'F' . $highestRow)->getAlignment()->setHorizontal('right');
+
+                $sheet->getProtection()->setSheet(true);
+                $sheet->getProtection()->setPassword('yourpassword123');
+
+                $sheet->getStyle('A1:G' . $lastRow)
+                      ->getProtection()
+                      ->setLocked(Protection::PROTECTION_PROTECTED);
             },
         ];
     }
