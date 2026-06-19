@@ -7,6 +7,14 @@
     <title>Acknowledgement Receipt</title>
 
     <style>
+        body {
+            font-family: 'Arial', sans-serif !important;
+        }
+
+        * {
+            font-family: 'Arial', sans-serif !important;
+        }
+        
         @page {
             size: 58mm auto;
             margin: 1mm;

@@ -51,7 +51,8 @@ class TransactionController extends Controller
         ->setOption('margin_top', 0)
         ->setOption('margin_right', 0)
         ->setOption('margin_bottom', 0)
-        ->setOption('margin_left', 0);
+        ->setOption('margin_left', 0)
+        ->setOption('defaultFont', 'Arial');;
 
         return $pdf->stream(
             'transaction_' . $transaction->transaction_code ?? $transaction->id . '.pdf'

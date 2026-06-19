@@ -11,7 +11,7 @@
         @page { margin: 8mm; }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'Arial', sans-serif !important;
             font-size: 9.8px;
             color: #111;
             line-height: 1.3;

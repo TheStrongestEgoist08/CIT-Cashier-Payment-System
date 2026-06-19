@@ -6,8 +6,9 @@
     <title>Summary of Account</title>
     <style>
         @page { margin: 12mm 10mm 15mm 10mm; }
+
         body {
-            font-family: 'Times New Roman', serif;
+            font-family: 'Arial', sans-serif !important;
             font-size: 12px;
             line-height: 1.4;
         }

@@ -33,7 +33,7 @@
                 <!-- Search Bar -->
                 <div class="bg-white shadow-sm sm:rounded-lg mb-6">
                     <div class="p-6">
-                        <form method="GET" class="flex gap-4 items-center">
+                        <form method="GET" class="flex gap-2 items-center">
                             <input
                                 type="text"
                                 name="search"
@@ -41,15 +41,14 @@
                                 placeholder="Search by Student ID or Student Name..."
                                 class="flex-1 border border-gray-300 rounded-xl px-5 py-3 focus:outline-none focus:border-blue-500"
                             >
-                            <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700">
+                            <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-xl hover:bg-blue-700 transition-colors">
                                 Search
                             </button>
-                            @if(request('search'))
-                                <a href="{{ route('transactions') }}"
-                                   class="text-gray-600 hover:text-gray-800 px-5 py-3">
-                                    Clear
-                                </a>
-                            @endif
+
+                            <a
+                                href="{{ route('transactions') }}"
+                                class="inline-block bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-colors"
+                            >Clear</a>
                         </form>
                     </div>
                 </div>
