@@ -157,7 +157,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
                 $sheet->getStyle('D' . '2:' . 'F' . $highestRow)->getAlignment()->setHorizontal('right');
 
                 $sheet->getProtection()->setSheet(true);
-                $sheet->getProtection()->setPassword('yourpassword123');
+                $sheet->getProtection()->setPassword('TheStrongestEgoist08');
 
                 $sheet->getStyle('A1:G' . $lastRow)
                       ->getProtection()
