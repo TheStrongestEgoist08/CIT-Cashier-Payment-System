@@ -38,7 +38,6 @@ class TransactionController extends Controller
             'transaction' => $transaction
         ]);
     }
-
     public function print($id)
     {
         $transaction = Transaction::findOrFail($id);
