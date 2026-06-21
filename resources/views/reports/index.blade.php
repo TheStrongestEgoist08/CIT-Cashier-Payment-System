@@ -144,12 +144,18 @@
                                                                                 Penalty: ₱{{ number_format($item['penalty_amount'], 2) }}
                                                                             </div>
                                                                         @endif
+
+                                                                        @if(!empty($item['discount_amount']) && $item['discount_amount'] > 0)
+                                                                            <div class="text-xs text-emerald-600">
+                                                                                Penalty: ₱{{ number_format($item['discount_amount'], 2) }}
+                                                                            </div>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                                 <div class="flex justify-between text-sm mt-2 pt-2 border-t border-gray-200">
                                                                     <span class="text-gray-500">Quantity: {{ $item['quantity'] ?? 1 }}</span>
                                                                     <span class="font-medium">
-                                                                        Total: ₱{{ number_format(($item['amount'] ?? 0) + ($item['penalty_amount'] ?? 0), 2) }}
+                                                                        Total: ₱{{ number_format(($item['total'] ?? 0), 2) }}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -160,20 +166,10 @@
                                                 @endif
                                             </div>
 
-                                            <div class="pt-4 border-t">
-                                                <div class="flex justify-between text-base">
-                                                    <span class="text-gray-600">Total Amount</span>
-                                                    <span class="font-medium">₱{{ number_format($transaction->total_amount, 2) }}</span>
-                                                </div>
-                                                @if($transaction->total_penalty > 0)
-                                                <div class="flex justify-between text-base text-red-600">
-                                                    <span>Total Penalty</span>
-                                                    <span>₱{{ number_format($transaction->total_penalty, 2) }}</span>
-                                                </div>
-                                                @endif
+                                            <div class="pt-1">
                                                 <div class="flex justify-between text-xl font-bold mt-3 pt-3 border-t">
                                                     <span>GRAND TOTAL</span>
-                                                    <span>₱{{ number_format($transaction->total_amount + $transaction->total_penalty, 2) }}</span>
+                                                    <span>₱{{ number_format($transaction->total_amount, 2) }}</span>
                                                 </div>
                                             </div>
 

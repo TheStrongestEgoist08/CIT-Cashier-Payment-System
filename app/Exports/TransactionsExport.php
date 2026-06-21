@@ -56,9 +56,10 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
             'DATE',
             'Name',
             'Payables',
-            'amount',
-            'penalty',
-            'total_amount',
+            'Amount',
+            'Penalty',
+            'Discount',           // ← New column
+            'Total Amount',
             'Recorded by'
         ];
     }
@@ -68,18 +69,24 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
         $rows = [];
         $first = true;
         $recordedBy = $transaction->createdBy->name ?? 'N/A';
-        $transactionTotal = $transaction->total_amount + $transaction->total_penalty;
+        $transactionTotal = $transaction->total_amount;
         $this->overallTotal += $transactionTotal;
 
         foreach ($transaction->payables as $item) {
-            $itemTotal = ($item['amount'] ?? 0) + ($item['penalty_amount'] ?? 0);
+            $itemTotal = ($item['amount'] ?? 0)
+                       + ($item['penalty_amount'] ?? 0)
+                       - ($item['discount_amount'] ?? 0);
+
+            $penalty  = $item['penalty_amount'] ?? 0;
+            $discount = $item['discount_amount'] ?? 0;
 
             $rows[] = [
                 $first ? $transaction->created_at->format('M d, Y') : '',
                 $first ? ($transaction->student->complete_name ?? 'N/A') : '',
                 $item['payable_name'] ?? 'N/A',
                 $item['amount'] ?? 0,
-                $item['penalty_amount'] ?? 0,
+                $penalty,
+                $discount,
                 $itemTotal,
                 $first ? $recordedBy : '',
             ];
@@ -95,6 +102,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
                 'Transaction Total',
                 '',
                 '',
+                '',
                 $transactionTotal,
                 '',
             ];
@@ -105,6 +113,7 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
                 $transaction->created_at->format('M d, Y'),
                 $transaction->student->complete_name ?? 'N/A',
                 'No Items',
+                0,
                 0,
                 0,
                 $transactionTotal,
@@ -131,14 +140,14 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                foreach (range('A', 'G') as $column) {
+                foreach (range('A', 'H') as $column) {   // Updated to H (8 columns)
                     $sheet->getColumnDimension($column)->setAutoSize(true);
                 }
 
                 $highestRow = $sheet->getHighestRow();
                 for ($row = 2; $row <= $highestRow; $row++) {
                     if ($sheet->getCell('C' . $row)->getValue() === 'Transaction Total') {
-                        $sheet->getStyle('A' . $row . ':G' . $row)->applyFromArray([
+                        $sheet->getStyle('A' . $row . ':H' . $row)->applyFromArray([
                             'font' => ['bold' => true],
                             'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => 'DBEAFE']],
                         ]);
@@ -147,19 +156,19 @@ class TransactionsExport implements FromCollection, WithHeadings, WithMapping, W
 
                 $lastRow = $highestRow + 2;
                 $sheet->setCellValue('A' . $lastRow, 'FINAL GRAND TOTAL');
-                $sheet->setCellValue('F' . $lastRow, $this->overallTotal);
+                $sheet->setCellValue('G' . $lastRow, $this->overallTotal);   // Updated column
 
-                $sheet->getStyle('A' . $lastRow . ':G' . $lastRow)->applyFromArray([
+                $sheet->getStyle('A' . $lastRow . ':H' . $lastRow)->applyFromArray([
                     'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
                     'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '1E40AF']],
                 ]);
 
-                $sheet->getStyle('D' . '2:' . 'F' . $highestRow)->getAlignment()->setHorizontal('right');
+                $sheet->getStyle('D' . '2:' . 'G' . $highestRow)->getAlignment()->setHorizontal('right');
 
                 $sheet->getProtection()->setSheet(true);
                 $sheet->getProtection()->setPassword('TheStrongestEgoist08');
 
-                $sheet->getStyle('A1:G' . $lastRow)
+                $sheet->getStyle('A1:H' . $lastRow)
                       ->getProtection()
                       ->setLocked(Protection::PROTECTION_PROTECTED);
             },

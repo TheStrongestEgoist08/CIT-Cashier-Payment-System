@@ -44,9 +44,9 @@ class ReportController extends Controller
         // Summary Statistics
         $summary = [
             'total_transactions' => $query->count(),
-            'total_amount'       => $query->sum('total_amount'),
+            'total_amount'       => $query->sum('total_amount') - $query->sum('total_penalty'),
             'total_penalty'      => $query->sum('total_penalty'),
-            'grand_total'        => $query->sum('total_amount') + $query->sum('total_penalty'),
+            'grand_total'        => $query->sum('total_amount'),
         ];
 
         return view('reports.index', compact('transactions', 'summary', 'period'));

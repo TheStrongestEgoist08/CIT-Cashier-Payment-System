@@ -123,7 +123,7 @@
                 <!-- Summary Cards -->
                 <div class="p-8">
 
-                    <div class="grid md:grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
 
                         <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
 
@@ -147,6 +147,19 @@
                             <p
                                 class="text-3xl font-bold text-red-600 mt-2"
                                 x-text="'₱' + Number(selectedTransaction?.total_penalty || 0).toLocaleString('en-PH',{minimumFractionDigits:2})"
+                            ></p>
+
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+
+                            <p class="text-xs uppercase text-blue-700">
+                                Total Discount
+                            </p>
+
+                            <p
+                                class="text-3xl font-bold text-blue-600 mt-2"
+                                x-text="'₱' + Number(selectedTransaction?.discount_amount || 0).toLocaleString('en-PH',{minimumFractionDigits:2})"
                             ></p>
 
                         </div>
@@ -186,6 +199,10 @@
 
                                     <th class="px-4 py-3 text-right">
                                         Penalty
+                                    </th>
+
+                                    <th class="px-4 py-3 text-right">
+                                        Discount
                                     </th>
 
                                     <th class="px-4 py-3 text-right">
@@ -236,6 +253,14 @@
 
                                             ₱<span
                                                 x-text="Number(item.penalty_amount || 0).toLocaleString('en-PH',{minimumFractionDigits:2})"
+                                            ></span>
+
+                                        </td>
+
+                                        <td class="px-4 py-4 text-right font-semibold text-emerald-600">
+
+                                            ₱<span
+                                                x-text="Number(item.discount_amount || 0).toLocaleString('en-PH',{minimumFractionDigits:2})"
                                             ></span>
 
                                         </td>
