@@ -11,6 +11,9 @@
             isSubmitting: false,
             orNumber: '',
 
+            // New discount-related properties
+            discountAmounts: {},
+
             async openPaymentModal(studentId) {
                 try {
                     const response = await fetch(`/students/${studentId}/payables`);
@@ -43,12 +46,17 @@
                 }
             },
 
-            payableBalance(item) {
+            payableBalances(item) {
                 return Number(item.amount || 0) - Number(item.paid_amount || 0) + Number(item.penalty_amount) || 0;
+            },
+
+            payableBalance(item) {
+                return Number(item.total_amount || 0) - Number(item.paid_amount);
             },
 
             isSelectable(item) {
                 if (item.is_repeatable) return true;
+
                 return this.payableBalance(item) > 0 && item.status !== 'paid';
             },
 
@@ -83,13 +91,13 @@
                     const newItem = { ...item };
 
                     newItem.is_exempted = false;
+                    newItem.discount_amount = 0;
+
+                    newItem.charge_amount = newItem.charge_amount || (newItem.is_repeatable ? this.getBasePrice(newItem) : this.payableBalance(newItem));
 
                     if (newItem.is_repeatable) {
                         newItem.quantity = 1;
                         newItem.size = '';
-                        newItem.charge_amount = this.getBasePrice(newItem);
-                    } else {
-                        newItem.charge_amount = this.payableBalance(newItem);
                     }
 
                     this.selectedPayables.push(newItem);
@@ -124,6 +132,18 @@
                 }
 
                 item.charge_amount = price * (item.quantity || 1);
+            },
+
+            setDiscount(index, amount) {
+                const item = this.selectedPayables[index];
+                if (item) {
+                    item.discount_amount = Math.max(0, Number(amount) || 0);
+
+                    // Prevent discount from exceeding charge amount
+                    if (item.discount_amount > (item.charge_amount || 0)) {
+                        item.discount_amount = item.charge_amount || 0;
+                    }
+                }
             },
 
             toggleExempted(index, event) {
@@ -274,20 +294,16 @@
 
                     if (res.ok && data.success) {
                         this.paymentModal = false;
-
                         if (data.print_url) {
                             const iframe = document.createElement('iframe');
                             iframe.style.display = 'none';
                             iframe.src = data.print_url;
-
                             iframe.onload = function () {
                                 iframe.contentWindow.focus();
                                 iframe.contentWindow.print();
                             };
-
                             document.body.appendChild(iframe);
                         }
-
                         alert('Payment recorded successfully.');
                     } else {
                         alert(data.message || `Payment failed (${res.status})`);
@@ -300,9 +316,19 @@
                 }
             },
 
+            // Updated total calculation with discount
             totalWithPenalty() {
                 return this.selectedPayables.reduce((sum, item) => {
-                    return sum + Number(item.total_amount || (Number(item.charge_amount) + Number(item.penalty_amount || 0)));
+
+                    const charge = Number(item.charge_amount) || 0;
+                    const penalty = Number(item.penalty_amount) || 0;
+                    const discount = Number(item.discount_amount) || 0;
+
+                    if (!item.is_repeatable) {
+                        return sum + (charge - discount);
+                    } else {
+                        return sum + (charge + penalty - discount);
+                    }
                 }, 0);
             },
 
@@ -465,6 +491,7 @@
             @include('students.partials.payment-modal')
             @include('students.partials.view-student-payables')
         </div>
+
     </div>
 
     <script>

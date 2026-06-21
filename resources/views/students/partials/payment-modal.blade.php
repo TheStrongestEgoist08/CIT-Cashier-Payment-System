@@ -24,6 +24,9 @@
                 <input type="hidden" :name="`selected_payables[${index}][payable_name]`" :value="item.payable_name">
                 <input type="hidden" :name="`selected_payables[${index}][payable_type]`" :value="item.payable_type">
                 <input type="hidden" :name="`selected_payables[${index}][charge_amount]`" :value="item.charge_amount">
+                
+                <input type="hidden" :name="`selected_payables[${index}][discount_amount]`" :value="item.discount_amount || 0">
+
                 <input type="hidden" :name="`selected_payables[${index}][penalty_amount]`" :value="item.penalty_amount || 0">
                 <input type="hidden" :name="`selected_payables[${index}][school_year]`" :value="item.school_year">
                 <input type="hidden" :name="`selected_payables[${index}][quantity]`" :value="item.quantity || 1">
@@ -239,6 +242,20 @@
                                               x-text="'₱ ' + Number(item.penalty_amount).toLocaleString('en-PH', {minimumFractionDigits: 2})"></span>
                                     </div>
                                 </template>
+
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-600">Discount</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm text-gray-500">₱</span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            :value="item.discount_amount || 0"
+                                            @input="setDiscount(index, $event.target.value)"
+                                            class="w-24 border border-gray-300 rounded-lg px-3 py-1 text-right focus:ring-blue-500">
+                                    </div>
+                                </div>
 
                                 <div class="border-t border-gray-200 pt-3 flex justify-between font-semibold text-base">
                                     <span class="text-gray-800">Item Total</span>

@@ -180,62 +180,6 @@ class StudentController extends Controller
         }
     }
 
-    /*
-    public function getPayabless(Student $student)
-    {
-        $student->load('studentPayables');
-
-        // === NON-REPEATABLE (Existing Student Payables) ===
-        $nonRepeatablePayables = $student->studentPayables
-            ->where('is_repeatable', false)  // Only non-repeatables
-            ->map(function ($sp) {
-                return [
-                    'id'                => $sp->id,
-                    'payable_id'        => $sp->payable_id,
-                    'payable_name'      => $sp->payable_name,
-                    'payable_type'      => $sp->payable_type,
-                    'school_year'       => $sp->school_year,
-                    'grade_level'       => $sp->grade_level,
-                    'amount'            => $sp->amount,
-                    'penalty_amount'    => $sp->penalty_amount,
-                    'total_amount'      => $sp->total_amount,
-                    'paid_amount'       => $sp->paid_amount,
-                    'status'            => $sp->status,
-                    'remarks'           => $sp->remarks,
-                    'is_repeatable'     => false,
-                    'details'           => null,
-                ];
-            })->values();
-
-        // === REPEATABLE Payables (for new purchases) ===
-        $repeatablePayables = Payable::where('is_repeatable', true)
-            ->get()
-            ->map(function ($payable) use ($student) {
-                return [
-                    'id'                => null,
-                    'payable_id'        => $payable->id,
-                    'payable_name'      => $payable->name,
-                    'payable_type'      => $payable->type,
-                    'school_year'       => $payable->school_year ?? $student->school_year,
-                    'grade_level'       => $student->grade_level,
-                    'amount'            => 0,
-                    'penalty_amount'    => 0,
-                    'total_amount'      => 0,
-                    'paid_amount'       => 0,
-                    'status'            => 'pending',
-                    'is_repeatable'     => true,
-                    'details'           => $payable->details,
-                ];
-            })->values();
-
-        return response()->json([
-            'student'              => $student,
-            'non_repeatables'      => $nonRepeatablePayables,
-            'repeatables'          => $repeatablePayables,
-        ]);
-    }
-    */
-
     public function getPayables(Student $student)
     {
         $student->load('studentPayables');
@@ -331,6 +275,8 @@ class StudentController extends Controller
             'or_number'         => 'nullable|string|max:50',
         ]);
 
+        # dd($request->all());
+
         try {
             $student = Student::findOrFail($request->student_id);
 
@@ -339,11 +285,13 @@ class StudentController extends Controller
 
             $totalAmount = 0;
             $totalPenalty = 0;
+            $totalDiscount = 0;
             $payablesData = [];
 
             foreach ($selectedPayables as $item) {
 
                 $chargeAmount = (float) ($item['charge_amount'] ?? 0);
+                $discountAmount = (float) ($item['discount_amount'] ?? 0);
                 $quantity     = (int) ($item['quantity'] ?? 1);
                 $size         = $item['size'] ?? null;
                 $isExempted   = filter_var($item['is_exempted'] ?? false, FILTER_VALIDATE_BOOLEAN);
@@ -378,7 +326,7 @@ class StudentController extends Controller
                             'paid_amount'    => 0,
                             'penalty_amount' => 0,
                             'status'         => 'exempted',
-                            'remarks'        => 'bigay',
+                            'remarks'        => 'bigay/labas',
                         ]);
 
                     } else {
@@ -404,6 +352,8 @@ class StudentController extends Controller
                     continue;
                 }
 
+                $effectiveCharge = $chargeAmount - $discountAmount;
+
                 /*
                 |--------------------------------------------------------------------------
                 | EXISTING PAYABLE
@@ -417,8 +367,11 @@ class StudentController extends Controller
 
                     $penaltyAmount = (float) ($studentPayable->penalty_amount ?? 0);
 
-                    $studentPayable->paid_amount =
-                        ($studentPayable->paid_amount ?? 0) + $chargeAmount;
+                    $studentPayable->paid_amount = ($studentPayable->paid_amount ?? 0) + $effectiveCharge;
+
+                    $studentPayable->discount_amount = $discountAmount;
+
+                    $studentPayable->total_amount = $effectiveCharge;
 
                     if ($orFromItem) {
                         $studentPayable->OR = $orFromItem;
@@ -442,17 +395,18 @@ class StudentController extends Controller
                         'payable_name'       => $payableName,
                         'payable_type'       => $payableType,
                         'school_year'        => $schoolYear,
-                        'amount'             => $chargeAmount,
+                        'amount'             => $chargeAmount - $penaltyAmount,
                         'penalty_amount'     => $penaltyAmount,
+                        'discount_amount'    => $discountAmount,
                         'quantity'           => 1,
                         'size'               => null,
                         'OR'                 => $orFromItem,
-                        'total'              => $chargeAmount + $penaltyAmount,
+                        'total'              => $effectiveCharge,
                     ];
 
-                    $totalAmount += $chargeAmount;
-                    $totalPenalty += $penaltyAmount;
-
+                    $totalAmount += $effectiveCharge;
+                    $totalPenalty += (float)($studentPayable->penalty_amount ?? 0);
+                    $totalDiscount += $discountAmount;
                 } else {
 
                     /*
@@ -471,9 +425,10 @@ class StudentController extends Controller
                         'grade_level'    => $student->grade_level,
                         'school_year'    => $schoolYear,
                         'amount'         => $baseAmount,
-                        'total_amount'   => $chargeAmount,
-                        'paid_amount'    => $chargeAmount,
-                        'penalty_amount' => 0,
+                        'total_amount'   => $effectiveCharge,
+                        'paid_amount'     => $effectiveCharge,
+                        'penalty_amount'    => 0,
+                        'discount_amount' => $discountAmount,
                         'due_date'       => now()->addDays(30),
                         'status'         => 'paid',
                         'OR'             => $orFromItem,
@@ -490,6 +445,7 @@ class StudentController extends Controller
                         'school_year'        => $schoolYear,
                         'amount'             => $baseAmount,
                         'penalty_amount'     => 0,
+                        'discount_amount'    => $discountAmount,
                         'quantity'           => $quantity,
                         'size'               => $size,
                         'OR'                 => $orFromItem,
@@ -497,6 +453,7 @@ class StudentController extends Controller
                     ];
 
                     $totalAmount += $chargeAmount;
+                    $totalDiscount += $discountAmount;
                 }
             }
 
@@ -523,6 +480,7 @@ class StudentController extends Controller
                 'transaction_code' => $transactionCode,
                 'total_amount'     => $totalAmount,
                 'total_penalty'    => $totalPenalty,
+                'discount_amount'  => $totalDiscount,
                 'payables'         => $payablesData,
                 'remarks'          => $orNumber ? 'OR: ' . $orNumber : null,
                 'created_by'       => auth()->id(),

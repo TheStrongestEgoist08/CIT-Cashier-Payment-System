@@ -14,6 +14,7 @@ class Transaction extends Model
         'transaction_code',
         'total_amount',
         'total_penalty',
+        'discount_amount',
         'payables',
         'remarks',
         'created_by'
@@ -23,6 +24,7 @@ class Transaction extends Model
         'payables'      => 'array',
         'total_amount'  => 'decimal:2',
         'total_penalty' => 'decimal:2',
+        'discount_amount'  => 'decimal:2',
     ];
 
     public function student()
