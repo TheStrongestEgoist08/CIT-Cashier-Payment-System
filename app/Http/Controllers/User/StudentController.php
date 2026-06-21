@@ -449,10 +449,10 @@ class StudentController extends Controller
                         'quantity'           => $quantity,
                         'size'               => $size,
                         'OR'                 => $orFromItem,
-                        'total'              => $chargeAmount,
+                        'total'              => $effectiveCharge,
                     ];
 
-                    $totalAmount += $chargeAmount;
+                    $totalAmount += $effectiveCharge;
                     $totalDiscount += $discountAmount;
                 }
             }
