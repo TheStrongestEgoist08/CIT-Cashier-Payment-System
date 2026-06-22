@@ -8,16 +8,11 @@
 
     <style>
         body {
-            font-family: 'Arial', sans-serif !important;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         * {
-            font-family: 'Arial', sans-serif !important;
-        }
-        
-        @page {
-            size: 58mm auto;
-            margin: 1mm;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         html,
@@ -30,7 +25,6 @@
         }
 
         body {
-            font-family: "Courier New", Courier, monospace;
             font-size: 14.5px;           /* Overall smaller */
             line-height: 1.18;
             font-weight: 900;
@@ -183,6 +177,7 @@
             html, body {
                 width: 58mm;
                 background: #fff;
+                font-family: Arial;
             }
         }
     </style>
@@ -225,7 +220,7 @@
                 <td class="label">Grade / Sec</td>
                 <td class="value">
                     @if ($transaction->student)
-                        {{ $transaction->student->year_level }}{{ $transaction->student->section ? ' - ' . $transaction->student->section : '' }}
+                        {{ $transaction->student->grade_level }}{{ $transaction->student->section ? ' - ' . $transaction->student->section : '' }}
                     @else
                         -
                     @endif
@@ -233,7 +228,7 @@
             </tr>
             <tr>
                 <td class="label">Cashier</td>
-                <td class="value">{{ $transaction->recorded_by ?? $transaction->created_by?->name ?? 'System' }}</td>
+                <td class="value">{{ $transaction->recorded_by ?? $transaction->createdBy?->name ?? 'System' }}</td>
             </tr>
         </table>
 

@@ -9,7 +9,8 @@
 
     <div class="py-10"
          x-data="{
-            showAddModal: false,
+            showAddModal: @js($errors->any()),
+            
             showActivateModal: false,
             showDeactivateModal: false,
             showDeleteModal: false,
