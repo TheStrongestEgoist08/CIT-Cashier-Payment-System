@@ -173,6 +173,6 @@
 
     <!-- Chart Scripts -->
     <script src="{{ $chart->cdn() }}"></script>
-    {{ $chart->script() }}
 
+    {{ $chart->script() }}
 </x-app-layout>

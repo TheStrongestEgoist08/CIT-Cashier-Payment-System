@@ -12,6 +12,7 @@ use App\Http\Controllers\User\ReportController as Report;
 use App\Http\Controllers\User\AccountController as Account;
 use App\Http\Controllers\User\ActivityLogController as Activity;
 use App\Http\Controllers\User\BackupController as Backup;
+use App\Http\Controllers\User\ORController as OriginalREceipt;
 
 Route::get('/', function () {
     return view('welcome');
@@ -200,3 +201,11 @@ Route::controller(Backup::class)->middleware(['auth', 'verified', 'role:admin'])
 
 });
 
+# OR Routes
+Route::controller(OriginalReceipt::class)->middleware(['auth', 'verified', 'role:cashier'])->group(function() {
+
+    Route::get('/OriginalReceipt', 'index')
+        ->name('OriginalReceipt');
+
+    
+});
