@@ -216,4 +216,7 @@ Route::controller(OriginalReceipt::class)->middleware(['auth', 'verified', 'role
     Route::delete('/OriginalReceipt/delete/{id}', 'delete')
         ->name('OriginalReceipt.update');
 
+    Route::get('/OriginalReceipt/next', 'getNext')
+        ->name('OriginalReceipt.next');
+
 });

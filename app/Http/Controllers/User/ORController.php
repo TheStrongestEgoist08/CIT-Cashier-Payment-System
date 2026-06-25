@@ -98,4 +98,19 @@ class ORController extends Controller
                 ->with('error', 'Failed to delete Original Receipt. ' . $e->getMessage());
         }
     }
+
+    public function getNext()
+    {
+        $nextOR = DB::transaction(function () {
+            $record = OriginalReceipt::lockForUpdate()->firstOrFail();
+
+            $next = $record->original_receipt_id;
+
+            return $next;  // nice format
+        });
+
+        return response()->json([
+            'or_number' => $nextOR
+        ]);
+    }
 }

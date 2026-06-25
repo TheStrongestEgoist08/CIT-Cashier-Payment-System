@@ -11,6 +11,7 @@ use App\Services\PayableAssignmentService;
 use App\Models\Transaction;
 use App\Models\StudentPayable;
 use App\Models\Payable;
+use App\Models\OriginalReceipt;
 
 class StudentController extends Controller
 {
@@ -62,7 +63,11 @@ class StudentController extends Controller
             ->sortDesc()
             ->values();
 
-        return view('students.index', compact('students', 'sections', 'schoolYears'));
+        $original_receipt = OriginalReceipt::first();
+
+        $original_receipt_id = $original_receipt?->original_receipt_id;
+
+        return view('students.index', compact('students', 'sections', 'schoolYears', 'original_receipt_id'));
     }
 
     public function import(Request $request)
@@ -485,6 +490,14 @@ class StudentController extends Controller
                 'remarks'          => $orNumber ? 'OR: ' . $orNumber : null,
                 'created_by'       => auth()->id(),
             ]);
+
+            if($orNumber !== null) {
+                $orRecord = OriginalReceipt::lockForUpdate()->firstOrFail();
+
+                $orRecord->increment('original_receipt_id');
+
+                $orRecord->save();
+            }
 
             return response()->json([
                 'success'          => true,

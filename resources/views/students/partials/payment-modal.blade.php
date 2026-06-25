@@ -24,7 +24,7 @@
                 <input type="hidden" :name="`selected_payables[${index}][payable_name]`" :value="item.payable_name">
                 <input type="hidden" :name="`selected_payables[${index}][payable_type]`" :value="item.payable_type">
                 <input type="hidden" :name="`selected_payables[${index}][charge_amount]`" :value="item.charge_amount">
-                
+
                 <input type="hidden" :name="`selected_payables[${index}][discount_amount]`" :value="item.discount_amount || 0">
 
                 <input type="hidden" :name="`selected_payables[${index}][penalty_amount]`" :value="item.penalty_amount || 0">
@@ -284,8 +284,8 @@
             <!-- OR Number -->
             <div class="flex-1 w-full md:w-auto">
                 <input
-                    type="text"
-                    max="50"
+                    type="number"
+                    readonly
                     x-model="orNumber"
                     name="or_number"
                     @input="applyORToAll()"

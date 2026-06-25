@@ -23,7 +23,16 @@
                     this.nonRepeatables = data.non_repeatables || [];
                     this.repeatables = data.repeatables || [];
                     this.selectedPayables = [];
-                    this.orNumber = '';
+
+                    const orResponse = await fetch('/OriginalReceipt/next');
+
+                    if (orResponse.ok) {
+                        const orData = await orResponse.json();
+                        this.orNumber = orData.or_number || '';
+                    } else {
+                        this.orNumber = '';
+                    }
+
                     this.paymentModal = true;
                 } catch (error) {
                     console.error(error);
@@ -251,7 +260,6 @@
 
             resetSelection() {
                 this.selectedPayables = [];
-                this.orNumber = '';
             },
 
             async handleSubmit() {
