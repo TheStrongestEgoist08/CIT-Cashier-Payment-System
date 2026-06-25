@@ -1,3 +1,4 @@
+
 {{-- OR Page --}}
 <x-app-layout>
     <x-slot name="header">
@@ -6,7 +7,25 @@
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-100 min-h-screen">
+    <div class="py-12 bg-gray-100 min-h-screen"
+         x-data="{
+            showCreate: false,
+            showEdit: false,
+            showDelete: false,
+            editData: {},
+            deleteId: null,
+
+            showCreateModal() { this.showCreate = true; },
+            showEditModal(receipt) {
+                this.editData = { ...receipt };
+                this.showEdit = true;
+            },
+            showDeleteModal(id) {
+                this.deleteId = id;
+                this.showDelete = true;
+            }
+         }">
+
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm rounded-lg">
                 <div class="p-6 text-gray-900">
@@ -26,7 +45,6 @@
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-semibold">Original Receipt</h3>
 
-                        {{-- Show Create button ONLY if no record exists --}}
                         @if (!$original_receipt)
                             <button @click="showCreateModal()"
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition">
@@ -69,40 +87,14 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modals - Now INSIDE the x-data scope -->
+        @if (!$original_receipt)
+            @include('OR.partials.modals.or-create')
+        @endif
+        @include('OR.partials.modals.or-edit')
+        @include('OR.partials.modals.or-delete-confirm')
+
     </div>
 
-    <!-- Modals -->
-    @if (!$original_receipt)
-        @include('OR.partials.modals.or-create')
-    @endif
-
-    @include('OR.partials.modals.or-edit')
-    @include('OR.partials.modals.or-delete-confirm')
-
 </x-app-layout>
-
-<script>
-    function initORModals() {
-        return {
-            showCreate: false,
-            showEdit: false,
-            showDelete: false,
-            editData: {},
-            deleteId: null,
-
-            showCreateModal() {
-                this.showCreate = true;
-            },
-
-            showEditModal(receipt) {
-                this.editData = { ...receipt };
-                this.showEdit = true;
-            },
-
-            showDeleteModal(id) {
-                this.deleteId = id;
-                this.showDelete = true;
-            }
-        }
-    }
-</script>

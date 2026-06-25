@@ -41,7 +41,7 @@
                     <x-nav-link :href="route('reports')" :active="request()->routeIs('reports')">
                         {{ __('Reports') }}
                     </x-nav-link>
-                    
+
                     @if($userRole === 'admin')
                         <x-nav-link :href="route('accounts')" :active="request()->routeIs('accounts')">
                             {{ __('Accounts') }}
@@ -57,6 +57,12 @@
                     @if($userRole === 'admin')
                         <x-nav-link :href="route('backup')" :active="request()->routeIs('backup')">
                             {{ __('Backup') }}
+                        </x-nav-link>
+                    @endif
+
+                    @if($userRole === 'cashier')
+                        <x-nav-link :href="route('OriginalReceipt')" :active="request()->routeIs('OriginalReceipt')">
+                            {{ __('OR') }}
                         </x-nav-link>
                     @endif
                 </div>

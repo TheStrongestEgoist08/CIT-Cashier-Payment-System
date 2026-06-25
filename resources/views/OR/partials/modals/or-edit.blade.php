@@ -1,12 +1,14 @@
 
 <!-- Edit Modal -->
-<div x-data="initORModals()" class="fixed inset-0 z-50" style="display: none" :style="{ display: showEdit ? 'flex' : 'none' }">
-    <div class="fixed inset-0 bg-black/50"></div>
+<div x-cloak
+     x-show="showEdit"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+     style="display: none;">
 
-    <div class="relative m-auto bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative">
         <h3 class="text-xl font-semibold mb-4">Edit Original Receipt</h3>
 
-        <form action="{{ route('or.update', '') }}" method="POST">
+        <form :action="`/OriginalReceipt/update/${editData.id}`" method="POST">
             @csrf
             @method('PUT')
 
@@ -20,7 +22,8 @@
             </div>
 
             <div class="flex justify-end gap-3 mt-6">
-                <button type="button" @click="showEdit = false"
+                <button type="button"
+                        @click="showEdit = false"
                         class="px-5 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
                     Cancel
                 </button>

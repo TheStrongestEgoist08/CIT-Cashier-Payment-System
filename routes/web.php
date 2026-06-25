@@ -207,5 +207,13 @@ Route::controller(OriginalReceipt::class)->middleware(['auth', 'verified', 'role
     Route::get('/OriginalReceipt', 'index')
         ->name('OriginalReceipt');
 
-    
+    Route::post('/OriginalReceipt/store', 'store')
+        ->name('OriginalReceipt.store');
+
+    Route::put('/OriginalReceipt/update/{id}', 'update')
+        ->name('OriginalReceipt.update');
+
+    Route::delete('/OriginalReceipt/delete/{id}', 'delete')
+        ->name('OriginalReceipt.update');
+
 });
