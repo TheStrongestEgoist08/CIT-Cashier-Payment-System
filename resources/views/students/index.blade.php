@@ -11,7 +11,6 @@
             isSubmitting: false,
             orNumber: '',
 
-            // New discount-related properties
             discountAmounts: {},
 
             async openPaymentModal(studentId) {
