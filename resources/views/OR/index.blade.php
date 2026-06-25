@@ -1,13 +1,12 @@
-
 {{-- OR Page --}}
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Original Receipt Management') }}
+            {{ __('Original Receipt') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 bg-gray-100 min-h-screen"
+    <div class="py-12 bg-gray-100"
          x-data="{
             showCreate: false,
             showEdit: false,
@@ -27,60 +26,53 @@
          }">
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg">
+            <div class="bg-white overflow-hidden shadow-sm rounded-lg" style="min-height: 460px;">
                 <div class="p-6 text-gray-900">
 
-                    <!-- Messages -->
-                    @if (session('success'))
-                        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-                    @if (session('error'))
-                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-semibold">Original Receipt</h3>
-
+                    <div class="flex justify-end items-center mb-6">
                         @if (!$original_receipt)
                             <button @click="showCreateModal()"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition">
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-lg transition text-base font-semibold">
                                 + New Original Receipt
                             </button>
                         @endif
                     </div>
 
                     @if ($original_receipt)
-                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-sm text-gray-500">Receipt ID</p>
-                                    <p class="text-xl font-bold text-gray-800">{{ $original_receipt->original_receipt_id }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500">Created At</p>
-                                    <p class="text-gray-700">{{ $original_receipt->created_at->format('d M Y, h:i A') }}</p>
-                                </div>
+                        <div class="max-w-md mx-auto text-center pt-2 pb-4">
+                            <!-- Blue Header like in image -->
+                            <p class="inline-block bg-blue-600 text-white text-base font-medium px-6 py-2 rounded-lg mb-8">
+                                Your Current Original Receipt ID is:
+                            </p>
+
+                            <!-- Bigger Digit Boxes -->
+                            <div class="flex justify-center gap-3 mb-10">
+                                @php
+                                    $digits = str_split((string) $original_receipt->original_receipt_id);
+                                @endphp
+                                @foreach ($digits as $digit)
+                                    <div class="w-16 h-20 bg-white border-2 border-gray-200 rounded-2xl flex items-center justify-center text-6xl font-bold text-gray-900 shadow-sm">
+                                        {{ $digit }}
+                                    </div>
+                                @endforeach
                             </div>
 
-                            <div class="mt-6 flex gap-3">
+                            <!-- Bigger Action Buttons -->
+                            <div class="flex gap-4 justify-center">
                                 <button @click="showEditModal({{ $original_receipt }})"
-                                        class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-lg transition">
-                                    Edit
+                                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-2xl transition flex items-center justify-center gap-2 text-base shadow-sm">
+                                    ✏️ Edit
                                 </button>
                                 <button @click="showDeleteModal({{ $original_receipt->id }})"
-                                        class="bg-red-600 hover:bg-red-700 text-white px-5 py-2 rounded-lg transition">
+                                        class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-4 rounded-2xl transition text-base shadow-sm">
                                     Delete
                                 </button>
                             </div>
                         </div>
                     @else
-                        <div class="text-center py-16">
-                            <p class="text-gray-500 text-lg">No Original Receipt found.</p>
-                            <p class="text-gray-400 mt-2">Click the button above to create one.</p>
+                        <div class="text-center py-12">
+                            <p class="text-gray-500 text-xl">No Original Receipt found.</p>
+                            <p class="text-gray-400 mt-2 text-base">Click the button above to create one.</p>
                         </div>
                     @endif
 
@@ -88,7 +80,6 @@
             </div>
         </div>
 
-        <!-- Modals - Now INSIDE the x-data scope -->
         @if (!$original_receipt)
             @include('OR.partials.modals.or-create')
         @endif
@@ -96,5 +87,4 @@
         @include('OR.partials.modals.or-delete-confirm')
 
     </div>
-
 </x-app-layout>

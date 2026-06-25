@@ -22,8 +22,10 @@ class ORController extends Controller
     {
         try {
             $validated = $request->validate([
-                'original_receipt_id' => 'required|integer|exists:original_receipts,id',
+                'original_receipt_id' => 'required|integer',
             ]);
+
+            # dd($validated);
 
             DB::transaction(function () use ($validated) {
                 OriginalReceipt::create([
@@ -52,7 +54,7 @@ class ORController extends Controller
     {
         try {
             $validated = $request->validate([
-                'original_receipt_id' => 'required|integer|exists:original_receipts,id',
+                'original_receipt_id' => 'required|integer',
             ]);
 
             DB::transaction(function () use ($validated, $id) {
