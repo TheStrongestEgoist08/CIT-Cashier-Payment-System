@@ -285,7 +285,6 @@
             <div class="flex-1 w-full md:w-auto">
                 <input
                     type="number"
-                    readonly
                     x-model="orNumber"
                     name="or_number"
                     @input="applyORToAll()"

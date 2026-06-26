@@ -494,9 +494,11 @@ class StudentController extends Controller
             if($orNumber !== null) {
                 $orRecord = OriginalReceipt::lockForUpdate()->firstOrFail();
 
-                $orRecord->increment('original_receipt_id');
-
-                $orRecord->save();
+                if($orNumber == $orRecord->original_receipt_id)
+                {
+                    $orRecord->increment('original_receipt_id');
+                    $orRecord->save();
+                }
             }
 
             return response()->json([
